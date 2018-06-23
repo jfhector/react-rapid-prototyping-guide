@@ -54,6 +54,38 @@ class App extends React.Component<Props, AppState> {
 
 See example above
 
+### Accessing nested pieces of state within components
+
+```
+interface Props {
+    displayedFilters: FiltersSet,
+    selectedMeasure: MeasureName,
+}
+
+export class DataSubtitle extends React.Component<Props, {}> {
+
+	...
+
+    render() {
+        const {
+            selectedMeasure,
+            displayedFilters,
+        } = this.props
+
+        const {
+            duration,
+            dates,
+            comparison,
+            subcategory,
+            region,
+            storeFormat,
+            customerSegment,
+        } = displayedFilters
+    
+    	return ( ... )    
+	}
+```
+
 ## How the type of state is defined
 
 In App.tsx, before the `App` class definition, the `AppState` type is defined as an interface.
@@ -96,11 +128,11 @@ If the `AppState` interface makes use of other types in its definition, define t
 
 TODO: EG
 
-## How state gets updated
+## How state gets updated via action handlers
 
 State only gets updated when action functions get called.
 
-All action functions are stored in an object stored on the `actions` property of the `App` class.
+All action handler functions are stored in an object stored on the `actions` property of the `App` class.
 
 These action function definitions can be grouped into objects stored on the object stored on the `actions` property of the `App` class.
 
@@ -209,9 +241,6 @@ TODO inc why .. as AppState in some cases
 ?? WHY Do I need to say 'as AppState'? Or rather, or does this comply to the 'AppState' type?
 
 
-
-
-
 ## Passing down the state object
 
 TODO PLACEHOLDER
@@ -247,13 +276,159 @@ interface Props {
 
 ## Passing down the actions object
 
-TODO explain this on `CollapseButton`
+The actions are defined in the App class definition, then passed down via props to whatever component instance needs to perform the action.
 
+
+Eg 
+
+1 Definition of different (but related) actions to be performed by two different instances of the same component
+```
+actions: {
+	...
+	expansionToggles: {
+	    toggleMeasuresSummaryExpanded: () => {
+	        this.setState(
+	            (prevState: AppState) => ({
+	                measuresSummaryExpanded: !prevState.measuresSummaryExpanded,
+	            })
+	        )
+	    },
+	    toggleKPITreesExpanded: () => {
+	        this.setState(
+	            (prevState: AppState) => ({
+	                KPITreesExpanded: !prevState.KPITreesExpanded
+	            })
+	        )
+	    },
+	},
+	...
+}
+```
+
+2. These different actions handlers are passed down via props to two different instances of the same component
 
 ```
+<CollapsibleContentBoard
+    title='Performance overview'
+    expanded={appState.measuresSummaryExpanded}
+    handleCollapseButtonClick={actions.expansionToggles.toggleMeasuresSummaryExpanded}
+>
+
+...
+
+<CollapsibleContentBoard
+    title='KPI tree'
+    expanded={appState.KPITreesExpanded}
+    handleCollapseButtonClick={actions.expansionToggles.toggleKPITreesExpanded}
+>
+
+...
+
+```
+
+## Typing action handler functions arguments
+
+When defining action handler functions, we need to be clear about what (if any) argument the function needs to receive, and the type of that argument. Same for return types.
+
+#### Action handlers that don't take any argument
+
+If an action handler function doesn't need to know anything about the event – other than the fact that it happened – the action handler will take no argument.
+This is typically the case for click action handlers.
+
+Eg
+```
+updateView: () => {
+    this.setState(
+        (prevState: AppState) => ({
+            displayedFilters: prevState.selectedFilters,
+            dataViewNeedsUpdating: false,
+        })
+    )
+}
+```
+
+Eg
+```
+conditionallySetMeasureInDetailBoardHeaderVisibleStateBasedOnScrollY: () => {
+    this.setState({
+          measureInDetailBoardHeaderVisible: (
+            (this.refToMeasureInDetailBoardHeaderContainingDiv.getBoundingClientRect() as DOMRect).top > 0
+          ) ? false : true,
+    })
+}
+```
+
+Eg
+```
+toggleMeasuresSummaryExpanded: () => {
+    this.setState(
+        (prevState: AppState) => ({
+            measuresSummaryExpanded: !prevState.measuresSummaryExpanded,
+        })
+    )
+}
+```
+
+#### Action handlers that take an argument of type union of magic strings
+
+Select elements return a string value, and use an array of string values to know what options to display.
+
+The type of their input array can be an union of magic strings, each representing one of the options to select from.
+
+The action handling function that gets triggered when their value change should be of type `(newlySelectedOption: OptionName) => Void`.
+
+```
+changeSelectedSubcategory: (newlySelectedSubcategory: MedicineSubcategoryName) => {
+    this.setState(
+        (prevState: AppState) => ({
+            selectedFilters: {
+                ...prevState.selectedFilters,
+                subcategory: newlySelectedSubcategory,
+            },
+            dataViewNeedsUpdating: true,
+        } as AppState)
+    )
+},
+```
+
+## Typing action handler functions themselves
+
+It's not enough to type the arguments than action handler functions receive.
+
+When a component receives an action handler function as a prop, it also needs to specify it's type so that the prop gets validated.
+
+#### Typing click handler functions
+
+Click event handlers have the type `React.MouseEventHandler<HTMLElement>` from React's types library.
+(I don't think it's useful to be more specific on the nature of the HTMLElement here).
+
+Eg from CollapseButton.tsx
+```
+interface Props {
+    // Instance-specific data extracted from appState upsteam
+    expanded?: boolean
+
     // Instance-specific function extracted from actions upstream
     handleClick?: React.MouseEventHandler<HTMLElement>
+}
 ```
+
+#### Typing #action handlers that take an argument of type union of magic strings
+
+Action handlers that take an argument of type union of magic strings can be typed loosely as follows:
+
+Eg from Selector.tsx
+```
+interface Props {
+    optionsArray: string[]
+    value: string
+
+    // Instance-specific function extraction from actions upstream
+    handleSelectorChange?: (newSelection: string) => void
+}
+```
+
+This loose typing is useful here as different instances of the Selector component will handle data types as different unions of magic strings.
 
 ## State management and Atomic Design
 
@@ -266,3 +441,18 @@ i.e.
 - Try to expose as much of the lower level components (i.e. Molecules and Atoms) in the class declaration of Organisms (e.g. by embedding components within one another using `props.children`).
 
 This is so that instance-specific data and functions can be passed to lower-level components at the level of the Organism (which knows about `appState`), so that we don't need to let lower level components know about state, so that they are purely presentational.
+
+--
+
+#### _Unless_ it's really much a throwaway little component that consumes lots of bits of state
+
+Eg DataSubtible
+```
+<div
+    className={s.subTitle}
+>
+    {`${selectedMeasure} • ${duration} • ${dates} ${comparison}`}
+    <br />
+    {`${subcategory} • ${region} • ${storeFormat} • ${customerSegment}`}
+</div>
+```

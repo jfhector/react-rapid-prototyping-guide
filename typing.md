@@ -358,3 +358,64 @@ In sharedTypes.ts:
 ```
 export type MedicineSubcategoryName = keyof typeof categoryHierarchy['MEDICINE']
 ```
+
+## Ensuring exhaustic `switch`
+
+TODO: Explain this. If I remove the throw new error, I get a compile error at the level of the _exhaustive check.
+Ie I know that numberFrom0To4 can only be 0..4, but TS doesn't. So I write this line of code to through an error if numberFrom0To4 is any other value, and then the check is guaranteed to be exhaustive.
+
+```
+if (!(numberFrom0To4 === 0 || numberFrom0To4 === 1 || numberFrom0To4 === 2 || numberFrom0To4 === 3 || numberFrom0To4 === 4)) { throw new Error('numberFrom0To3 wasn\'t 0, 1, 2 or 3') }
+
+    // Switch on this number to return one of the data sets above
+    switch (numberFrom0To4) {
+        case 0:
+            return dataForAllMeasuresBasedOnAppState0[measure]
+        case 1:
+            return dataForAllMeasuresBasedOnAppState1[measure]
+        case 2:
+            return dataForAllMeasuresBasedOnAppState2[measure]
+        case 3:
+            return dataForAllMeasuresBasedOnAppState3[measure]
+        case 4:
+            return dataForAllMeasuresBasedOnAppState3[measure]
+        default:
+            const _exhaustiveCheck: never = numberFrom0To4
+            return _exhaustiveCheck
+```
+
+## Typing action handler functions and their arguments
+
+See in State Management
+
+## Specific React typings that get used in my prototypes
+
+#### Mouse event handlers
+
+```
+interface Props {
+    // Instance-specific data extracted from appState upsteam
+    expanded?: boolean
+
+    // Instance-specific function extracted from actions upstream
+    handleClick?: React.MouseEventHandler<HTMLElement>
+}
+```
+
+#### Children props (or anything renderable by React)
+
+If a prop can contain 'anything that can be rendered by React` (e.g. a children prop), the type of `React.ReactNode`
+
+```
+interface Props {
+    children: React.ReactNode
+    typeOption?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
+    dismissable?: boolean
+```
+
+
+## ??
+
+```
+export type KPIDataForAllMeasures = { [K in MeasureName]: MeasureData }
+```
