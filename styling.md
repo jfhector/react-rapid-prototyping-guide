@@ -9,7 +9,15 @@ Import the css file into the component. Each component has:
 import * as s from './App.css'
 ```
 
-### Note: If something doesn't work here (eg the CSS module name doesn't get picked up, try restarting the server)
+### Note: If something doesn't work here (eg the CSS module name doesn't get picked up, try restarting the server).
+
+This happened again just now. Just doing a plain CSS Module import (i.e. `import './Button.css'`) didn't report any compile-time error, but the styles never got applied.
+
+And ideally, I wanted to load with `import * as s from './Button.css` so I can use `typings-for-css-modules-loader`. But when I start a component, I get a compile error on this line, and the module isn't picked up.
+
+Restarting the server didn't work today.
+
+Then I replaced with a standard CSS Module import (i.e. `import './Button.css'`), got that loaded (by also removing `s.` from the className in the component's render function, temporarily), then reverting it all back to `import * as s from './Button.css`, and then it worked.
 
 ## How to drive style from props
 
@@ -424,3 +432,16 @@ Note: This example is so simple that it wouldn't require keyframe animation. Her
 TODO
 
 eg Coll
+
+
+
+
+
+
+## Using CSS Grid
+
+### Whenever
+
+
+
+
