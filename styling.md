@@ -435,7 +435,31 @@ eg Coll
 
 
 
+## Display property
 
+#### Displaying things inline: i.e. one element, then the next, on the same line.
+
+__I do not need flexbox or grid to do this, just `span` (or anything else if it's set to `display: inline-block`).__
+
+I can display a `div` inline by applying the CSS rule `display: inline-block`.
+But I might as well change the `div` for a `span`, which has the same effect.
+
+```
+rightNode={
+    <> 
+        <span
+            className={s.measureInDetailBoardRightNodeLabel}
+        >
+            Selected measure:
+        </span>
+        <Selector
+            optionsArray={measureOptions}
+            value={`${selectedMeasure}`}
+            handleSelectorChange={changeSelectedMeasure}
+        />
+    </>
+}
+```
 
 
 ## Using CSS Grid
