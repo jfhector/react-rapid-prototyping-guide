@@ -7,7 +7,7 @@ These are the types that a component might use, and where the type defintions ar
 
 #### `Props` type is defined locally in each component file, before the type definition.
 
-	Each component file (including the root `App` component), has a `Prop` interface definition before the class definion.
+Each component file (including the root `App` component), has a `Prop` interface definition before the class definion.
 This interface is then passed to the component's definition as the type for its props.
 
 #### Any types other than `Props` are defined in `sharedTypes.ts` as they will (potentially) be shared across multiple files / components.
@@ -21,11 +21,15 @@ This includes `AppState`, `Actions` and `RefAssignmentFunctions`. Each of these 
 
 Most of the time, I'd start by creating a data object in the `data` folder, and __then declaring any types that components or functions throughout the app will need to use this data__, in `sharedTypes.ts`.
 
-__I follow 3 steps:
-1. Create a data object I need, in a file in the `data` folder
-2. How will this piece of data get used by components and functions throughout the app?
-3. What type(s) are needed?
-4. Declare the type(s) in `sharedTypes.ts`__
+__I follow 3 steps:__
+
+__1. Create a data object I need, in a file in the `data` folder__
+
+__2. How will this piece of data get used by components and functions throughout the app?__
+
+__3. What type(s) are needed?__
+
+__4. Declare the type(s) in `sharedTypes.ts`__
 
 
 __In any case, the type is only defined, only located, and only exported from `sharedTypes.ts`__.
@@ -35,6 +39,7 @@ __In any case, the type is only defined, only located, and only exported from `s
 1. Create the data object
 
 `actions` data object declared in `App.tsx`:
+
 ```
 class App extends React.Component<Props, AppState> {
 
@@ -97,6 +102,7 @@ class App extends React.Component<Props, AppState> {
             
             ...
 ```
+
 2. How will this piece of data get used by components and functions throughout the app?
 
 a. the `actions` object gets passed down to Organisms via props ..
@@ -161,8 +167,6 @@ export const durationOptions = {
 __Note: I created `durationOptions` as an object, although I don't need the keys' values and although the `select` html element that will display the options needs an array, not an object, because__:
 - Writing an object, even with unused values, allows me to write the data first and extract the type from it – rather than needing to rewrite the same data again in the type definition.
 - I can get an array from object keys using `Object.keys(..)`
-
-				TODO: ALSO PASTE THIS IN THE DATA DOC
 
 2. How will this piece of data get used by components and functions throughout the app?
 
@@ -259,8 +263,6 @@ export type ComparisonOptionsObject =
     ComparisonOptionsObjectFor52WeekDuration
 ```
 
-												TODO: EXPLAIN THE BUSINESS WITH DATA GETTER FUNCTIONS (AND HOW THEY ARE SEPARATED FROM THE RAW DATA) IN DATA DOC
-
 #### Eg5 Things like a category hierarchy, eg `MedicineSubcategoryName`
 
 Most of the time, I'd start by creating a data object in the `data` folder, and __then declaring any types that components or functions throughout the app will need to use this data__, in `sharedTypes.ts`.
@@ -286,7 +288,6 @@ export const categoryHierarchy = {
     }
 }
 ```
-												TODO: EXPLAIN THIS BUSINESS IN THE DATA DOC
 
 2. How will this piece of data get used by components and functions throughout the app?
 
@@ -308,7 +309,7 @@ export type MedicineSubcategoryOption = keyof typeof categoryHierarchy['MEDICINE
 
 __Note: notice how I've extracted a type from a subobject of the categoryHierarchy I've defined. I could do this at the level of all subcategories, and below that, which I'd probably do if I had a more complex hierarchy system.__
 
-												TODO: DOCUMENT THIS IN DATA
+
 
 ### Approach 2: Writing a type definition from scratch in `sharedTypes.ts`
 
@@ -457,8 +458,6 @@ So I write it from scratch from `MeasureData` and `MeasureOption` like this:
 ```
 export type KpisDataForAllMeasures = {[K in MeasureOption]: MeasureData}
 ```
-
-				TODO: DOCUMENT THIS PATTERN
 
 ## Use a module file rather than a TS script file or an ambient declaration file
 
@@ -763,11 +762,4 @@ interface Props {
     children: React.ReactNode
     typeOption?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
     dismissable?: boolean
-```
-
-
-## ??
-
-```
-export type KPIDataForAllMeasures = { [K in MeasureName]: MeasureData }
 ```
