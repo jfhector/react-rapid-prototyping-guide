@@ -712,28 +712,146 @@ export type MedicineSubcategoryName = keyof typeof categoryHierarchy['MEDICINE']
 
 ## Ensuring exhaustic `switch`
 
-TODO: Explain this. If I remove the throw new error, I get a compile error at the level of the _exhaustive check.
-Ie I know that numberFrom0To4 can only be 0..4, but TS doesn't. So I write this line of code to through an error if numberFrom0To4 is any other value, and then the check is guaranteed to be exhaustive.
+TS allows me to automatically check, at compile time, that my `switch` cases are exhaustive.
+
+The way to do this is to __declare a `const` arbitrarily named `_exhaustiveCheck` of type `never` in the switch block's `default` case, and assign it the value I'm using as a switch.__
+
+Eg
 
 ```
-if (!(numberFrom0To4 === 0 || numberFrom0To4 === 1 || numberFrom0To4 === 2 || numberFrom0To4 === 3 || numberFrom0To4 === 4)) { throw new Error('numberFrom0To3 wasn\'t 0, 1, 2 or 3') }
+<img
+    src={
+        (function () {
+            switch (appState.selectedMeasure) {
+                case 'Sales value':
+                case 'Basket penetration':
+                    return PROTOIMG_graph_salesValue
+                case 'Spend per customer':
+                case 'Frequency of purchase':
+                case 'Sales units':
+                    return PROTOIMG_graph_spendPerCustomer
+                case 'Customers':
+                case 'Retailer visits':
+                    return PROTOIMG_graph_customers
+                case 'Spend per visit':
+                case 'Units per visit':
+                    return PROTOIMG_graph_spendPerVisit
+                default:
+                    const _exhaustiveCheck: never = appState.selectedMeasure
+            }
+        })()
+    }
+/>
+```
 
-    // Switch on this number to return one of the data sets above
-    switch (numberFrom0To4) {
-        case 0:
-            return dataForAllMeasuresBasedOnAppState0[measure]
-        case 1:
-            return dataForAllMeasuresBasedOnAppState1[measure]
-        case 2:
-            return dataForAllMeasuresBasedOnAppState2[measure]
-        case 3:
-            return dataForAllMeasuresBasedOnAppState3[measure]
-        case 4:
-            return dataForAllMeasuresBasedOnAppState3[measure]
+The reason this works is that:
+
+- the `never` type in TS represents something that never happens.
+Eg a function that never returns has the return type of `never`. 
+
+Eg
+
+```
+function neverReturns(): never { throw new Error() }
+```
+
+Note: a function with return type `never` (i.e. a function that never returns) is not to be confused with a function of return type `void` (i.e. a function that returns nothing).
+
+- a variable/const of type `never` can only be assigned to another variable/const of type `never`.
+
+- so if my switch cases are _exhaustive_ before the `default` case, the variable/const I'm switching on (eg here `appState.selectedMeasure`), placed in the `default` block, _will not return any assignment value_, so I can assign it to `const _exhaustiveCheck: never`.
+
+- but on the other hand if my switch cases are _not exhaustive before_ the `default` case, the variable/const I'm switching on, placed in the `default` block, _will return a value_, so it can't be assigned to `const _exhaustiveCheck: never` and I get a helpful compile time error.
+
+### Note: If I use the `const _exhaustiveCheck: never = valueImSwitchingOn` pattern inside a function and `strictNullChecks` is on, I need to return `_exhaustiveCheck`
+
+Otherwise TS complains that the function might return undefined, and hence that the return type of the function is wrong.
+
+Eg:
+
+```
+export function comparisonOptionsFor(selectedDuration: DurationOption): ComparisonOptionsObject {
+    switch (selectedDuration) {
+        case '52 weeks': 
+            return comparisonOptionsFor52WeekDuration
+        case '26 weeks': 
+            return comparisonOptionsFor26WeekDuration
+        case '12 weeks': 
+            return comparisonOptionsFor12WeekDuration
+        case '4 weeks': 
+            return comparisonOptionsFor4WeekDuration
         default:
-            const _exhaustiveCheck: never = numberFrom0To4
+            const _exhaustiveCheck: never = selectedDuration
             return _exhaustiveCheck
+    }
+}
 ```
+### Note: I can use this pattern with `if () else if () else ()` blocks as well.
+
+I.e. treat the final `else` in the same way I treat `default` above.
+
+Eg:
+
+```
+function area(s: Shape) {
+    if (s.kind === "square") {
+        return s.size * s.size;
+    }
+    else if (s.kind === "rectangle") {
+        return s.width * s.height;
+    }
+    else if (s.kind === "circle") {
+        return Math.PI * (s.radius **2);
+    }
+    else {
+        const _exhaustiveCheck: never = s;
+    }
+}
+```
+
+## Using type assertion
+
+### Eg using type assertion to ensure that TS types the value I switch on as tightly as it should
+
+Eg in this example, although I _know_ that `intFrom0To4` can only be 0, 1, 2, 3 or 4, the TS compiler isn't smart enough to see that:
+
+```
+// Deterministically derive an integer from 0 to 4 from appState
+const numberThatIsDifferentForDifferentValuesOfDisplayedFilters = Object.values(appState.displayedFilters).join().length + Number.parseInt(appState.displayedFilters.duration) + Number.parseInt(appState.displayedFilters.dates)
+
+const intFrom0To4 = numberThatIsDifferentForDifferentValuesOfDisplayedFilters % 5
+
+// TS thinks that type of intFrom0to4 is number
+```
+
+I can _assert_ that the type of `numberThatIsDifferentForDifferentValuesOfDisplayedFilters % 5` is 0 | 1 | 2 | 3 | 4 by writing:
+
+```
+const intFrom0To4 = numberThatIsDifferentForDifferentValuesOfDisplayedFilters % 5 as (0 | 1 | 2 | 3 | 4)
+```
+
+__Note that type assertion needs to happen on the right hand side of the assignment operation.__
+
+This then llows me to use `intFrom0To4` in an exhaustive switch block:
+
+```
+switch (intFrom0To4) {
+    case 0:
+        return dataForAllMeasuresBasedOnAppState0
+    case 1:
+        return dataForAllMeasuresBasedOnAppState1
+    case 2:
+        return dataForAllMeasuresBasedOnAppState2
+    case 3:
+        return dataForAllMeasuresBasedOnAppState3
+    case 4:
+        return dataForAllMeasuresBasedOnAppState4
+    default:
+        const _exhaustiveCheck: never = intFrom0To4
+        return _exhaustiveCheck
+}
+```
+
 
 ## Typing action handler functions and their arguments
 

@@ -132,7 +132,9 @@ TODO: EG
 
 State only gets updated when action functions get called.
 
-All action handler functions are stored in an object stored on the `actions` property of the `App` class.
+__All action handler functions are stored in an object stored on the `actions` property of the `App` class.__
+
+__And I mean all of them, even those that might never get used by any other component than `App` (e.g. actions triggered by event listeners, which live on `App` as well).__ This is for simplicity: any action that changes state lives on this object.
 
 These action function definitions can be grouped into objects stored on the object stored on the `actions` property of the `App` class.
 

@@ -94,3 +94,41 @@ When I need to export variations of a design (eg to represent different states o
 
 ![](./assets/organisingAltVersionsInSketch.png)
 ![](./assets/organisingAltVersionsInSketch2.png)
+
+
+
+## How to show different images based on some condition
+
+1. Import all the image assets the component might display and assign them to different constants:
+
+```
+import { PROTOIMG_graph_salesValue, PROTOIMG_graph_customers, PROTOIMG_graph_spendPerCustomer, PROTOIMG_graph_spendPerVisit, PROTOIMG_table_subcategories_customers, PROTOIMG_table_subcategories_salesValue, PROTOIMG_table_subcategories_spendPerCustomer, PROTOIMG_table_subcategories_spendPerVisit, PROTOIMG_table_customerTypes_salesValue, PROTOIMG_table_regions_salesValue, PROTOIMG_table_storeFormats_salesValue, PROTOIMG_kpiTree } from './../../../assets/'
+```
+
+2. Use an IIFE with a switch block returning the right constant, right inline when specifying the `src` of the `<img />` html element.
+
+To write an IIFE, write the whole function definition in between `(...)`, then add calling parentheses at the end.
+
+```
+<img 
+	src={
+		switch (appState.selectedMeasure) {
+			case 'Sales value':
+			case 'Basket penetration':
+				return PROTOIMG_graph_salesValue
+			case 'Spend per customer':
+			case 'Frequency of purchase':
+			case 'Sales units':
+				return PROTOIMG_graph_spendPerCustomer
+			...
+			default:
+				const _exhaustiveCheck: never = appState.selectedMeasure
+		}
+	} 
+/>
+```
+
+Note: Remember that switch cases fall through from one another by default in JS.
+
+Note: I tried to replace this IIFE with an assetGetter function, but I didn't manage as it wasn't clear what the return type should be (I don't think there's a clear type in TS for an image asset held in a variable), and returning an <img src={} /> html element didn't work.
+

@@ -174,27 +174,88 @@ Each prop of tyle union of magic strings has its own marker in the CSS file
 
 ## Using the `className` dependency to facilitate applying CSS rulesets conditionally
 
+__`'classnames'` is a simple JavaScript utility for conditionally joining classNames together.__
+
+Eg
+
 ```
-<div
+classNames('foo', 'bar'); 					// => 'foo bar'
+classNames('foo', { bar: true }); 		// => 'foo bar'
+classNames({ 'foo-bar': true }); 			// => 'foo-bar'
+classNames({ 'foo-bar': false }); 		// => ''
+classNames({ foo: true }, { bar: true }); // => 'foo bar'
+classNames({ foo: true, bar: true }); 	// => 'foo bar'
+```
+
+Essentially:
+- Any string I give it as an argument, gets added to the string that I assign to `className`
+- I can use a string as an object key, with an associated boolean value. At runtime, if that value is true, the strings gets added, but not if it's false.
+
+This allows me to very easy apply, or not apply, CSS classes based on a boolean value that I got frop props or state.
+
+Eg
+
+```
+<button
     className={classNames(
-        s.CollapsibleContentModule,
+        'Button',
+        typeOption,
+        sizeOption,
         {
-            [s.expanded]: expanded,
+            'fullWidth': fullWidth,
+            'disabled': disabled,
         }
     )}
+    onClick={!disabled ? handleButtonClick : (() => { console.log('Button was clicked but is disabled') })}
 >
-	...
-</div>
+    {children}
+</button>
 ```
 
-TO DO EXPLAIN THIS
+#### Using the classNames(..) function to dynamically, conditionally construct strings for the `className` tag
 
-Note: I'm importing the `className` using a `require` statement. There might be a good reason for this.
 ```
-import classNames = require('classnames')
+className(
+	'Button',
+			// always adds the 'Button' class name to the returned string
+	typeOption,
+	sizeOption,
+			// always adds the typeOption and sizeOption strings (passed through props) to the returned string
+	{
+		'fullWidth': fullWidth,
+	   	'disabled': disabled,
+			// adds the 'fullWidth' and 'disabled' string only if the fullWidth and disabled bools evaluate to true   	
+	}	
+)
 ```
+
+#### If using computed strings (i.e. variables/const that evaluate as strings) as object keys for conditionally applying CSS classes, remember to use the computed key object creation syntax: {[myComputedKeyOfTypeString]: value}
+
+```
+<button
+    className={classNames(
+        s.Button,
+        s[typeOption!],
+        s[sizeOption!],
+        {
+            [s.fullWidth]: fullWidth,
+            [s.disabled]: disabled,
+        }
+    )}
+    onClick={!disabled ? handleButtonClick : (() => { console.log('Button was clicked but is disabled') })}
+>
+    {children}
+</button>
+```
+
+
+
 
 ## Using typechecking to ensure that I'm only using CSS rulesets that do exist in the CSS file
+
+`typings-for-css-modules-loader` is a small npm module that is a
+__'Drop-in replacement for css-loader to generate typings for your CSS-Modules on the fly in webpack'__
+
 
 0. Install `typings-for-css-modules-loader` as a devDependency
 
@@ -460,12 +521,3 @@ rightNode={
     </>
 }
 ```
-
-
-## Using CSS Grid
-
-### Whenever
-
-
-
-
