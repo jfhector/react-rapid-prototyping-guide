@@ -79,7 +79,7 @@ I can use
 
 __Note: I need to provide a type for the array element passed into the map callback (i.e. `(measureOption: MeasureOption)`, and I need parentheses around this before the `->`.__
 
-#### When to use this vs RY?
+## When to use this vs RY?
 
 I can easily use this whenever:
 a. the only difference between the component instances I want to render is 1 value that they get as props 
@@ -108,3 +108,58 @@ Object.keys(measureOptions).map((measureOption: MeasureOption) =>
 
 __Note: I can reorder the list of elements in the `Object.keys(myDataSourceObject)` array by reordering the keys within the definition of `myDataSourceObject`.__
 
+
+## Adding a `key` tag to the html element or React component I return using `array#map`
+
+__Whenever I render an array of react nodes (i.e. whenever I use `array#map` to render a html element or react component), the stuff that gets repeated (i.e. the html element or the react component) needs a key tag, assigned a string that is unique among members of the array and consistent across re-renders__
+
+I can just add a `key` tag to either the component (I don't need to have the `key` tag declared as part of my `Props`), or to the html element.
+
+Eg1: adding a `key` tag to a html element
+
+```
+<select
+    className={styles.Selector}
+    value={props.value}
+    onChange={(event) => props.handleSelectorChange!(event.target.value)}
+>
+    {
+        props.optionsArray.map(
+            (arrayElement: string, index: number) => (
+                <option
+                    key={arrayElement + String(index)}
+                    value={arrayElement}
+                >
+                    {arrayElement}
+                </option>
+            )
+        )
+    }
+</select>
+```
+
+Eg2: adding a `key` tag to a React component
+
+```
+<CollapsibleContentBoard
+    title='Performance overview'
+    expanded={props.appState.expanded.measuresSummaryBoard}
+    handleCollapseButtonClick={props.actions.toggleExpansion.measuresSummary}
+>
+    <div
+        className={styles.KpiTilesContainer}
+    >
+        {
+            Object.keys(measureOptions).map((measureOption: MeasureOption) =>
+                <KpiTile
+                    measure={measureOption}
+                    kpisData={kpisDataForAllMeasuresFor(props.appState)[measureOption]}
+                    selected={props.appState.selectedMeasure === measureOption}
+                    handleKpiTileClick={props.actions.changeSelected.measure}
+                    key={measureOption}
+                />
+            )
+        }
+    </div>
+</CollapsibleContentBoard>
+```

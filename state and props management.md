@@ -516,73 +516,28 @@ interface Props {
 Note: I can use this `{ }` pattern to insert any javascript value, eg a function call that returns a javascript value.
 I can define functions as lightweight components ('almost component', before it becomes one), then call them in the return function.
 
-## How much to use object destructuring on props
-
-__Only do 1 level of object destructuring on props_.
-
-On presentational components, if I've only passed them the 1 piece of data they need in each prop, there isn't any further level of destructuring possible:
+## Only destructure `const { props } = this`
 
 ```
-export class CollapsibleContentBoard extends React.Component<Props, {}> {
-	...
-	
-    render() {
-        const {
-            title,
-            children,
-            headerIsSticky,
-            handleCollapseButtonClick,
-            refAssignmentFunctionforHeaderContainingDiv,
-            headerHighlighted,
-            expanded,
-            rightNode
-        } = this.props
+render() {
+        const { props } = this
 
         return (
             <div
                 className={classNames(
-                    s.CollapsibleContentBoard,
+                    styles.KpiTile,
                     {
-                        [s.expanded]: expanded,
-                        [s.headerIsSticky]: headerIsSticky,
-                        [s.headerContainerVisible]: headerHighlighted
+                        [styles.selected]: props.selected,
+                        [styles.changedUpwards]: props.kpisData.changedUpwards,
                     }
                 )}
+                onClick={() => props.handleKpiTileClick!(props.measure)}
             >
-```
-
-On connected components, 1 level of object destructuring on props gives me local `appState` and `actions` constants. When I pass props further down, I then start the assigned reference with `appState. ..` or `actions. ..`.
-
-```
-export class DataViewComponent extends React.Component<Props, {}> {
-
-    render() {
-        const {
-            appState,
-            actions,
-            refAssignmentFunctions,
-        } = this.props
-        
-        return (
-        		...
-        		
-            <CollapsibleContentModule
-                title='Trend'
-                displayedFilters={appState.displayedFilters}
-                expanded={appState.expanded.trendGraphModule}
-                handleCollapseButtonClick={actions.toggleExpansion.trendGraph}
-            >
-                <DataSubtitle
-                    selectedMeasure={appState.selectedMeasure}
-                    displayedFilters={appState.displayedFilters}
-                />
-                
-        		...
-        )
-        ...
-     }
-     ...    
-}
+                <div
+                    className={styles.measureName}
+                >
+                    {props.measure}
+                </div>
 ```
 
 ## Driving props from state using any custom logic
