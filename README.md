@@ -1,0 +1,1 @@
+My own notes and real code examples from working prototypes to establish and document optimal patterns for rapid prototyping with React and Typescript.
