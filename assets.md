@@ -6,11 +6,6 @@ Images are stores in an `assets` folder, inside the `src` folder.
 
 Images are imported via an `require` statement at the top of each module, from the assets folder.
 
-
-?? What do I need for this to work?
-
-?? Image hashing?
-
 ## How to preload images managed by Webpack (i.e. included in my src/ directory)
 
 Problem: If for example I am showing some images only conditionally, I want the loading time to be minimal or non-existent.
@@ -28,15 +23,6 @@ Solution:
 - All other components throughout the app which need image assets, import the constants that hold the right image asset from `./assets/`.
 
 - `App.tsx` imports the `AssetsLoader` component directly (it's the only component that does), and renders it right at the bottom of the page, so that all images are pre-loaded as part of the initial app loading.
-
-TODO: SHOW EXAMPLES OF ALL THIS, INC THE IMPORTS IN RELEVANT COMPONENTS
-
-## How I use file images in code
-
-TODO: IMPORTS IN RELEVANT COMPONENT
-
-TODO: INTRINSIC SIZE
-
 
 
 ## How I name assets
@@ -130,5 +116,5 @@ To write an IIFE, write the whole function definition in between `(...)`, then a
 
 Note: Remember that switch cases fall through from one another by default in JS.
 
-Note: I tried to replace this IIFE with an assetGetter function, but I didn't manage as it wasn't clear what the return type should be (I don't think there's a clear type in TS for an image asset held in a variable), and returning an <img src={} /> html element didn't work.
+Note: I tried to replace this IIFE with an assetGetter function, but I didn't manage as it wasn't clear what the return type should be (I don't think there's a clear type in TS for an image asset held in a variable), and returning an `<img src={} />` html element didn't work.
 

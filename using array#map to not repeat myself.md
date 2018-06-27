@@ -89,6 +89,7 @@ AND c. I have a type for a valid possible value
 b and c. are easily achieved if I define the different values before hand as the keys of an object:
 
 Eg
+
 ```
 const measureOptions = {
 	'Sales value': undefined,

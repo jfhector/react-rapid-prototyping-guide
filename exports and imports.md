@@ -8,6 +8,7 @@ export class Alert extends React.Component<Props, {}> { ... }
 ```
 
 in index.ts, at the root of the components folder
+
 ```
 // ATOMS
 export * from './atoms/Counter/Counter'

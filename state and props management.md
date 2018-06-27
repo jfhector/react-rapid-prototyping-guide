@@ -242,11 +242,6 @@ changeSelectedComparison: (newlySelectedComparison: ComparisonOption) => {
 TODO inc why .. as AppState in some cases
 ?? WHY Do I need to say 'as AppState'? Or rather, or does this comply to the 'AppState' type?
 
-
-## Passing down the state object
-
-TODO PLACEHOLDER
-
 ### Reasons for passing specific props rather than appState, as much as possible
 
 #### Keeping components presentational as much as possible

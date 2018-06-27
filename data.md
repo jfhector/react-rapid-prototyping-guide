@@ -123,7 +123,7 @@ __Note: I extract arrays from object keys at the moment when the array is needed
 
 Things like a category hierarchy data are easily represented by nested objects, eg `MedicineSubcategoryName`.
 
-1. Create a data object I need, in a file in the `data` folder
+1 Create a data object I need, in a file in the `data` folder
 
 ```
 export const categoryHierarchy = {
@@ -145,19 +145,19 @@ export const categoryHierarchy = {
 }
 ```
 
-2. How will this piece of data get used by components and functions throughout the app?
+2 How will this piece of data get used by components and functions throughout the app?
 
 a. A select element will need to display the subcategories of `MEDICINE` as options. It will need this as an array but I can extract the array of the object's keys. Depending on how the select element receives this data, it might or might not need to be passed through props and validated as an object of all the options.
 
 b. As a user selects one of them, an action will receive that selection, to update state with it.
 
-3. What type(s) are needed?
+3 What type(s) are needed?
 
 a. No
 
 b. `MedicineSubcategoryOption`
 
-4. Declare the type(s) in `sharedTypes.ts`
+4 Declare the type(s) in `sharedTypes.ts`
 
 ```
 export type MedicineSubcategoryOption = keyof typeof categoryHierarchy['MEDICINE']
@@ -168,7 +168,7 @@ __Note: notice how I've extracted a type from a subobject of the categoryHierarc
 
 ## Store raw data, shared types and dataGetter functions in separate files
 
-1. Raw data:
+### 1 Raw data:
 
 When I write data for my app, I should write it without logic, as plain objects, first.
 
@@ -248,7 +248,7 @@ export const dateOptionsFor52WeekDuration = {
 }
 ```
 
-2. Shared types:
+### 2 Shared types:
 
 From this, shared types are generated. These leave in a separate file `sharedTypes.ts`.
 
@@ -274,7 +274,7 @@ export type DateOption =
     DateOptionFor52WeekDuration
 ```
 
-3. dataGetter functions:
+### 3 dataGetter functions:
 
 I will sometimes needs logic (i.e. functions) to determine which alternative piece of data needs to be passed as a prop.
 E.g. if the value of the `duration` piece of state determined which duration options and comparison options to show.
@@ -283,6 +283,7 @@ E.g. if I've created alternate versions of data, and the prototype needs to serv
 I __put all data getter functions in a separate `dataGetters.ts` file__. This allows the raw data to be clean and easy to add to / edit, and nicely isolate the logic in a separate file, making data easier to reason above.
 
 Eg
+
 ```
 export function datesOptionsFor(selectedDuration: DurationOption): DateOptionsObject {
     switch (selectedDuration) {

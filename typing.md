@@ -36,7 +36,7 @@ __In any case, the type is only defined, only located, and only exported from `s
 
 #### Eg1 `Actions` type declaration, extracted using `typeof` on an object already on `App#actions`..
 
-1. Create the data object
+1 Create the data object
 
 `actions` data object declared in `App.tsx`:
 
@@ -103,15 +103,15 @@ class App extends React.Component<Props, AppState> {
             ...
 ```
 
-2. How will this piece of data get used by components and functions throughout the app?
+2 How will this piece of data get used by components and functions throughout the app?
 
 a. the `actions` object gets passed down to Organisms via props ..
 
-3. What type(s) are needed?
+3 What type(s) are needed?
 
 a. .. so I need a `Actions` type to validate each prop
 
-4. Declare the `Actions` type in `sharedTypes.ts`
+4 Declare the `Actions` type in `sharedTypes.ts`
 
 ```
 // ACTIONS
@@ -121,7 +121,7 @@ export type Actions = typeof App.prototype.actions
 
 #### Eg2 `RefAssignmentFunctions` type declaration, extracted using `typeof` on an object already on `App#refAssignmentFunctions`.
 
-1. Create the data object, here on the `refAssignmentFunctions` property of `App`:
+1 Create the data object, here on the `refAssignmentFunctions` property of `App`:
 
 ```
     // REFS
@@ -135,15 +135,15 @@ export type Actions = typeof App.prototype.actions
     }
 ```
 
-2. How will this piece of data get used by components and functions throughout the app?
+2 How will this piece of data get used by components and functions throughout the app?
 
 a. `refAssignmentFunctions` get passed as a property to Organisms ..
 
-3. What type(s) will be needed by components / funcions that will use this data?
+3 What type(s) will be needed by components / funcions that will use this data?
 
 a. so I need a `RefAssignmentFunctions` type to validate the prop.
 
-4. Declare the `RefAssignmentFunctions` type in `sharedTypes.ts`
+4 Declare the `RefAssignmentFunctions` type in `sharedTypes.ts`
 
 ```
 // REF ASSIGNMENT FUNCTIONS
@@ -153,7 +153,7 @@ export type RefAssignmentFunctions = typeof App.prototype.refAssignmentFunctions
 
 #### Eg3 Selector options type declaration, extrated using `keyof typeof` on a data object already created
 
-1. I create the data object I need
+1 I create the data object I need
 
 ```
 export const durationOptions = {
@@ -168,18 +168,18 @@ __Note: I created `durationOptions` as an object, although I don't need the keys
 - Writing an object, even with unused values, allows me to write the data first and extract the type from it – rather than needing to rewrite the same data again in the type definition.
 - I can get an array from object keys using `Object.keys(..)`
 
-2. How will this piece of data get used by components and functions throughout the app?
+2 How will this piece of data get used by components and functions throughout the app?
 
 a. The `changeSelected.duration` action takes a duration option as an argument ...
 
 b. The `select` html element that will display the duration options needs an array of all the duration options.
 I can extract an array of keys from the object above.
 
-3. What type(s) will be needed?
+3 What type(s) will be needed?
 
 a. ... will need a type for a valid `DurationOption` to validate its argument
 
-4. Declare these types in `sharedTypes.ts`
+4 Declare these types in `sharedTypes.ts`
 
 ```
 // DURATION OPTIONS
@@ -189,7 +189,7 @@ export type DurationOption = keyof typeof durationOptions
 
 #### Eg4 Dynamic selector options (i.e. what options to display isn't as simple as reading a static object, but depends on another piece of state, so we need a dataGetter function)
 
-1. Create a static data object I need, in a file in the `data` folder
+1 Create a static data object I need, in a file in the `data` folder
 
 ```
 export const comparisonOptionsFor4WeekDuration = {
@@ -213,7 +213,7 @@ export const comparisonOptionsFor52WeekDuration = {
 }
 ```
 
-2. How will this piece of data get used by components and functions throughout the app?
+2 How will this piece of data get used by components and functions throughout the app?
 
 a. These options will be displayed by a `select` html element, so a `select` element will need to receive an array of these options. I can create an array of the object's keys using `Object.keys(..)`.
 
@@ -222,7 +222,7 @@ b. Users will select 1 option, and an action will get the corresponding string a
 c. Which comparison objects shoud be presented by the `select` element depends on what `duration` is currently selected (state), so I need a dataGetter function, which takes a DurationOption as an argument and returns one of the 4 ComparisonOptionsObject above.
 
 
-3. What type(s) are needed?
+3 What type(s) are needed?
 
 a. I might need a type to validate a valid comparison duration array (or object, before an array is extracted from it), or maybe not, depending how the data is passed to the `select` element (i.e. directly from a connected component, which will get the data from `appState`, or through intermediary props?).
 
@@ -231,7 +231,7 @@ b. .. the action object will need a `ComparisonOption` type to validate that the
 c. I need a type to validate the return value of the function, probably an union type `ComparisonOptionsObject` union of the type of the four data comparison objects.
 
 
-4. Declare the type(s) in `sharedTypes.ts`
+4 Declare the type(s) in `sharedTypes.ts`
 
 a. nothing for now
 
@@ -267,7 +267,7 @@ export type ComparisonOptionsObject =
 
 Most of the time, I'd start by creating a data object in the `data` folder, and __then declaring any types that components or functions throughout the app will need to use this data__, in `sharedTypes.ts`.
 
-1. Create a data object I need, in a file in the `data` folder
+1 Create a data object I need, in a file in the `data` folder
 
 ```
 export const categoryHierarchy = {
@@ -289,13 +289,13 @@ export const categoryHierarchy = {
 }
 ```
 
-2. How will this piece of data get used by components and functions throughout the app?
+2 How will this piece of data get used by components and functions throughout the app?
 
 a. A select element will need to display the subcategories of `MEDICINE` as options. It will need this as an array but I can extract the array of the object's keys. Depending on how the select element receives this data, it might or might not need to be passed through props and validated as an object of all the options.
 
 b. As a user selects one of them, an action will receive that selection, to update state with it.
 
-3. What type(s) are needed?
+3 What type(s) are needed?
 
 a. No
 

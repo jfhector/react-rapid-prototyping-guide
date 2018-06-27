@@ -1,4 +1,6 @@
-## Declaration syntax using string litterals
+# JS refreshers
+
+## Declaration syntax using string litterals: Using strings as object keys
 
 I can use any string litteral as key for an object directly, when creating an object litteral: `{'any litteral string': 64}`
 
