@@ -7,7 +7,8 @@ The app's state is stored in 1, and only 1 place: on the `state` property of the
 
 ```
 class App extends React.Component<Props, AppState> {
-    refToMeasureInDetailBoardHeaderContainingDiv: HTMLDivElement
+
+    // STATE
 
     state: AppState = {
         selectedFilters: {
@@ -88,7 +89,7 @@ export class DataSubtitle extends React.Component<Props, {}> {
 
 ## How the type of state is defined
 
-In App.tsx, before the `App` class definition, the `AppState` type is defined as an interface.
+`AppState`, the type of the state object, is defined in `sharedTypes.ts`.
 
 ```
 export interface AppState {
@@ -124,10 +125,6 @@ Then this `AppState` interface is passed into the `App` class definition as the 
 class App extends React.Component<Props, AppState> {
 ```
 
-If the `AppState` interface makes use of other types in its definition, define these other types just before the `AppState` definition whenever possible.
-
-TODO: EG
-
 ## How state gets updated via action handlers
 
 State only gets updated when action functions get called.
@@ -139,65 +136,73 @@ __And I mean all of them, even those that might never get used by any other comp
 These action function definitions can be grouped into objects stored on the object stored on the `actions` property of the `App` class.
 
 ```
-actions = {
-    updateView: () => {
-        this.setState(
-            (prevState: AppState) => ({
-                displayedFilters: prevState.selectedFilters,
-                dataViewNeedsUpdating: false,
-            })
-        )
-    },
-    
-    ...
-    
-    selectionChanges: {
-        changeSelectedDuration: (newlySelectedDuration: DurationOption) => {
-            this.setState(
-                (prevState: AppState) => ({
-                    selectedFilters: {
-                        ...prevState.selectedFilters,
-                        duration: newlySelectedDuration,
-                        comparison: getComparisonOptions(newlySelectedDuration)[0]
-                    },
-                    dataViewNeedsUpdating: true,
-                } as AppState)
-            )
-        },
-        changeSelectedDates: (newlySelectedDates: DateOption) => {
-            this.setState(
-                (prevState: AppState) => ({
-                    selectedFilters: {
-                        ...prevState.selectedFilters,
-                        dates: newlySelectedDates
-                    },
-                    dataViewNeedsUpdating: true,
-                } as AppState)
-            )
-        },
-        
-        ...
-        
-    },
-    expansionToggles: {
-        toggleMeasuresSummaryExpanded: () => {
-            this.setState(
-                (prevState: AppState) => ({
-                    measuresSummaryExpanded: !prevState.measuresSummaryExpanded,
-                })
-            )
-        },
-        toggleKPITreesExpanded: () => {
-            this.setState(
-                (prevState: AppState) => ({
-                    KPITreesExpanded: !prevState.KPITreesExpanded
-                })
-            )
-        },
-        
-		...
-    },
-}
+export class DataSubtitle extends React.Component<Props, {}> {
+	
+	// STATE
+	
+	...
+	
+	// ACTIONS
+	
+	actions = {
+	    updateView: () => {
+	        this.setState(
+	            (prevState: AppState) => ({
+	                displayedFilters: prevState.selectedFilters,
+	                dataViewNeedsUpdating: false,
+	            })
+	        )
+	    },
+	    
+	    ...
+	    
+	    selectionChanges: {
+	        changeSelectedDuration: (newlySelectedDuration: DurationOption) => {
+	            this.setState(
+	                (prevState: AppState) => ({
+	                    selectedFilters: {
+	                        ...prevState.selectedFilters,
+	                        duration: newlySelectedDuration,
+	                        comparison: getComparisonOptions(newlySelectedDuration)[0]
+	                    },
+	                    dataViewNeedsUpdating: true,
+	                } as AppState)
+	            )
+	        },
+	        changeSelectedDates: (newlySelectedDates: DateOption) => {
+	            this.setState(
+	                (prevState: AppState) => ({
+	                    selectedFilters: {
+	                        ...prevState.selectedFilters,
+	                        dates: newlySelectedDates
+	                    },
+	                    dataViewNeedsUpdating: true,
+	                } as AppState)
+	            )
+	        },
+	        
+	        ...
+	        
+	    },
+	    expansionToggles: {
+	        toggleMeasuresSummaryExpanded: () => {
+	            this.setState(
+	                (prevState: AppState) => ({
+	                    measuresSummaryExpanded: !prevState.measuresSummaryExpanded,
+	                })
+	            )
+	        },
+	        toggleKPITreesExpanded: () => {
+	            this.setState(
+	                (prevState: AppState) => ({
+	                    KPITreesExpanded: !prevState.KPITreesExpanded
+	                })
+	            )
+	        },
+	        
+			...
+	    },
+	}
 ```
 
 ## How setState gets called
@@ -302,7 +307,7 @@ actions: {
 }
 ```
 
-2. These different actions handlers are passed down via props to two different instances of the same component
+2 These different actions handlers are passed down via props to two different instances of the same component
 
 ```
 <CollapsibleContentBoard
@@ -456,7 +461,7 @@ Eg DataSubtible
 
 ## Passing down react nodes as props
 
-1. If I am rolling my own prop (i.e. not children) to pass react nodes to a component, it needs to be only _1_ node. So if I want to pass several, I can wrap them in a `div` or a react fragment `<>`.
+1 If I am rolling my own prop (i.e. not children) to pass react nodes to a component, it needs to be only _1_ node. So if I want to pass several, I can wrap them in a `div` or a react fragment `<>`.
 
 ```
 rightNode={
@@ -475,7 +480,7 @@ rightNode={
 }
 ```
 
-2. In the component that receives the prop, type the prop as `React.ReactNode`, which means 'anything that can be rendered by React`.
+2 In the component that receives the prop, type the prop as `React.ReactNode`, which means 'anything that can be rendered by React`.
 
 ```
 interface Props {
@@ -484,7 +489,7 @@ interface Props {
     rightNode?: React.ReactNode
 ```
 
-3. Then insert the value of the prop using `{ }` in the render return function, just like I do for children props.
+3 Then insert the value of the prop using `{ }` in the render return function, just like I do for children props.
 (I do not need to place it in `<  />`, it will not work).
 
 ```
