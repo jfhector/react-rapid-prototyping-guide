@@ -34,11 +34,11 @@ return (
     <button
         className={classNames(
             styles.Button,
-            s[typeOption!],
-            s[sizeOption!],
+            styles[typeOption!],
+            styles[sizeOption!],
             {
-                [styles.fullWidth]: fullWidth,
-                [styles.disabled]: disabled,
+                [styles.fullWidth]: props.fullWidth,
+                [styles.disabled]: props.disabled,
             }
         )}
         onClick={!disabled ? handleButtonClick : (() => { console.log('Button was clicked but is disabled') })}
@@ -205,7 +205,7 @@ Eg in `Alert.tsx`:
 
 ```
 <button
-    className={classNames(stylestyles.button)}
+    className={classNames(styles.button)}
     type='button'
     onClick={() => { }}
     >
@@ -293,11 +293,11 @@ Eg
 <button
     className={classNames(
         'Button',
-        typeOption,
-        sizeOption,
+        styles[props.typeOption],
+        styles[props.sizeOption],
         {
-            'fullWidth': fullWidth,
-            'disabled': disabled,
+            'fullWidth': props.fullWidth,
+            'disabled': props.disabled,
         }
     )}
     onClick={!disabled ? handleButtonClick : (() => { console.log('Button was clicked but is disabled') })}
@@ -312,12 +312,12 @@ Eg
 className(
 	'Button',
 			// always adds the 'Button' class name to the returned string
-	typeOption,
-	sizeOption,
+	styles[props.typeOption!],
+	styles[props.sizeOption!],
 			// always adds the typeOption and sizeOption strings (passed through props) to the returned string
 	{
-		'fullWidth': fullWidth,
-	   	'disabled': disabled,
+		'fullWidth': props.fullWidth,
+	   	'disabled': props.disabled,
 			// adds the 'fullWidth' and 'disabled' string only if the fullWidth and disabled bools evaluate to true   	
 	}	
 )
@@ -329,11 +329,11 @@ className(
 <button
     className={classNames(
         styles.Button,
-        s[typeOption!],
-        s[sizeOption!],
+        styles[props.typeOption!],
+        styles[props.sizeOption!],
         {
-            [styles.fullWidth]: fullWidth,
-            [styles.disabled]: disabled,
+            [styles.fullWidth]: props.fullWidth,
+            [styles.disabled]: props.disabled,
         }
     )}
     onClick={!disabled ? handleButtonClick : (() => { console.log('Button was clicked but is disabled') })}
@@ -373,7 +373,7 @@ eg 1: CSS classed applied conditionally to the outermost `div` returned by the c
     className={classNames(
         styles.CollapsibleContentModule,
         {
-            [styles.expanded]: expanded,
+            [styles.expanded]: props.expanded,
         }
     )}
 >
@@ -401,11 +401,11 @@ eg3
 <button
     className={classNames(
         styles.Button,
-        s[typeOption!],
-        s[sizeOption!],
+        styles[props.typeOption!],
+        styles[props.sizeOption!],
         {
-            [styles.fullWidth]: fullWidth,
-            [styles.disabled]: disabled,
+            [styles.fullWidth]: props.fullWidth,
+            [styles.disabled]: props.disabled,
         }
     )}
     onClick={!disabled ? handleButtonClick : (() => { console.log('Button was clicked but is disabled') })}
@@ -435,11 +435,11 @@ return (
     <button
         className={classNames(
             styles.Button,
-            s[typeOption!],
-            s[sizeOption!],
+            styles[props.typeOption!],
+            styles[props.sizeOption!],
             {
-                [styles.fullWidth]: fullWidth,
-                [styles.disabled]: disabled,
+                [styles.fullWidth]: props.fullWidth,
+                [styles.disabled]: props.disabled,
             }
         )}
         onClick={!disabled ? handleButtonClick : (() => { console.log('Button was clicked but is disabled') })}
@@ -449,7 +449,7 @@ return (
 )
 ```
 
-__Note: `s[typeOption!]` is for a `typeOption` prop that returns one of several possible strings (as per the Props type), each of which matches a css class in the `.css` file.__
+__Note: `styles[typeOption!]` is for a `typeOption` prop that returns one of several possible strings (as per the Props type), each of which matches a css class in the `.css` file.__
 
 ```
 interface Props {
@@ -617,11 +617,11 @@ Notice how the `disabled` class name will appear last in the list of class names
 <button
     className={classNames(
         styles.Button,
-        s[typeOption!],
-        s[sizeOption!],
+        styles[props.typeOption!],
+        styles[props.sizeOption!],
         {
-            [styles.fullWidth]: fullWidth,
-            [styles.disabled]: disabled,
+            [styles.fullWidth]: props.fullWidth,
+            [styles.disabled]: props.disabled,
         }
     )}
     onClick={!disabled ? handleButtonClick : (() => { console.log('Button was clicked but is disabled') })}
@@ -754,9 +754,9 @@ In `Alert.tsx`:
 <div
     className={classNames(
         styles.Alert,
-        s[typeOption!],
+        styles[props.typeOption!],
         {
-            [styles.visible]: visible
+            [styles.visible]: props.visible
         }
     )}
     onClick={handleClick}
@@ -866,9 +866,9 @@ Notice how the outermost html element (here, a `div`) gets applied the `headerIs
     className={classNames(
         styles.CollapsibleContentBoard,
         {
-            [styles.expanded]: expanded,
-            [styles.headerIsSticky]: headerIsSticky,
-            [styles.headerHighlighted]: headerHighlighted
+            [styles.expanded]: props.expanded,
+            [styles.headerIsSticky]: props.headerIsSticky,
+            [styles.headerHighlighted]: props.headerHighlighted
         }
     )}
 >
@@ -913,8 +913,8 @@ In `KpiTile.tsx`:
     className={classNames(
         styles.KpiTile,
         {
-            [styles.selected]: selected,
-            [styles.changedUpwards]: kpisData.changedUpwards,
+            [styles.selected]: props.selected,
+            [styles.changedUpwards]: props.kpisData.changedUpwards,
         }
     )}
 >
@@ -1168,3 +1168,31 @@ rightNode={
     </>
 }
 ```
+
+
+
+## Sticky
+
+#### Should overflow be set to hidden / visible for sticky to work?
+
+In the past yes (see MDN docs for position). Now, it seems to work in Chrome without it
+
+#### Why isn't my sticky element not sticking?
+
+A sticky element on sticks in so far as it can stay within its parent html element.
+
+I.e. it needs space, within this component, to move to stay within it as well as sticking.
+If it doesn't have space, it will follow the component rather than stick.
+
+#### What causes a sticky component to break its sticking position?
+
+A sticky element breaks its sticking position when it has to in order to stay within its parent component (which is typically static, and hence scrolling).
+
+#### Can I get different sticky components to 'push' each other out of view?
+
+I don't know how.
+
+It's not as simple as setting different elements to sticky and hope that they'll push each other out of their position (they don't, they overlap each other instead).
+
+See video ref in `assets` folder: `how sticky elements dont push each other`
+

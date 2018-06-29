@@ -710,7 +710,11 @@ switch (intFrom0To4) {
 
 See in State Management
 
-## Specific React typings that get used in my prototypes
+
+
+## Cheat sheet of types
+
+### Specific React typings that get used in my prototypes
 
 #### Mouse event handlers
 
@@ -734,3 +738,9 @@ interface Props {
     typeOption?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
     dismissable?: boolean
 ```
+
+### Other types
+
+The type of an array of string is `string[]` (not `[string]` as a Swift).
+
+
