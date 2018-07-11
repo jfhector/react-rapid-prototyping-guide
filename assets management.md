@@ -129,7 +129,7 @@ Instead, take a few minutes to create a symbol, which I will instantiate several
 
 Put these symbols in the ’Symbols’ page of the ‘PROTO_MASTER’ doc.
 
-![](./assets/assetsManagement - symbols and where they live.png)
+![](./assets/assetsManagement-symbolsAndWhereTheyLive.png)
 
 ## Creating symbols so that they're easy to override
 
@@ -141,25 +141,26 @@ Put these symbols in the ’Symbols’ page of the ‘PROTO_MASTER’ doc.
 - Name the elements with short, consistent, easily scannable names – so I can find and override these properties easier
 - Mark any text element or nested symbol that I will not need to override for the different instances as private (_elementName)
 
-![](./assets/assetsManagement - organisation and naming.png)
+![](./assets/assetsManagement-organisationAndNaming.png)
 
 #### 3 Text elements overriding: 
 - Make sure that text fields can accomodate long enough content for the different instances’ data. (eg I can use align right, or allign bottom, with ample boxes)
 
-![](./assets/assetsManagement - space and alignment for text content overriding.png)
+![](./assets/assetsManagement-spaceAndAlignmentForTextContentOverriding.png)
 
 #### 4 Nested symbols overriding: 
 If instances customisation will require the use of a different element, create a separate atomic symbol (along with alternative versions). With just that element, and nest it in the symbol. If a symbol has nested symbols, I can override each of the nested symbols on the symbol’s instance.
 
-![](./assets/assetsManagement - nested symbols for overriding.png)
+![](./assets/assetsManagement-nestedSymbolsForOverriding.png)
 
 #### 5 Use nested symbols overriding because text styles overriding isn’t yet possible in Sketch
 Sketch allows symbol instances to have a different text content, but not a different text style.
 The workaround is to create a symbol for the text element (and alternative versions of the text symbol with different styles), and then to nest that symbol in my symbol.
 To do this, in the ‘Symbols’ page of the ‘PROTO_MASTER’, create an artboard that has the same size as the text element I want to symbolise. Then copy and paste the text element in it, and convert the artboard into a symbol. Then back into the higher-order symbol, replace the element with the symbol (i.e. nesting a symbol in place of an element).
 
-![](./assets/assetsManagement - alternative symbols for overridable text styles.png)
-![](./assets/assetsManagement - overriding symbols as text styles.png)
+![](./assets/assetsManagement-alternativeSymbolsForOverridableTextStyles.png)
+
+![](./assets/assetsManagement-overridingSymbolsAsTextStyles.png)
 
 Note: I can create these more atomic symbols for nesting either in the ‘Symbols’ page of the ‘PROTO_MASTER’ doc, or in the project’s shared library (if I think that the symbol will be reused somewhere else).
 
@@ -191,8 +192,9 @@ Then, in the ‘PROTOSVG_ exports’ page:
 8. Copy and paste the `trendGraph/populatedTemplate` into the ‘PROTOSVG_ exports’ page (Nb: I’m not inserting the `trendGraph/noData` symbol, but coping and pasting the `trendGraph/populatedTemplate` artboard which has the `trendGraph/noData` symbol in it).
 9. Customise the populated data for each instance
 
-![](./assets/assetsManagement - symbols with no data and accompanying populated template artboards for copying and pasting.png)
-![](./assets/assetsManagement - PopulatedTemplate imported and customised.png)
+![](./assets/assetsManagement-symbolsWithNoDataAndAccompanyingPopulatedTemplateArtboardsForCopyingAndPasting)
+
+![](./assets/assetsManagement-populatedTemplateImportedAndCustomised.png)
 
 
 
