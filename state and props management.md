@@ -3,57 +3,148 @@
 
 ## Where state is stored
 
-The app's state is stored in 1, and only 1 place: on the `state` property of the root `App` class definition
+State objects are defined, and managed, on the lowest-possible component that is or renders all the components that use or set the state.
+
+This is the same thing that the React docs recommend.
+
+eg
 
 ```
-class App extends React.Component<Props, AppState> {
+import * as React from 'react'
+import * as styles from './CollapsibleContentBoard.css'
+import * as classNames from 'classnames'
+import { CollapseButton } from '../..';
 
-    // STATE
+type Props = {
+    title: string
+    children: React.ReactNode
+    headerIsSticky?: boolean
+    rightNode?: React.ReactNode
+    initiallyExpanded?: boolean
+}
 
-    state: AppState = {
-        selectedFilters: {
-            duration: '4 weeks',
-            dates: '25 Dec 2017 - 21 Jan 2018',
-            comparison: 'vs. previous 4 weeks',
-            subcategory: 'All product groups',
-            storeFormat: 'All store formats',
-            customerSegment: 'All customer segments',
-            region: 'All regions',
-        },
-        displayedFilters: {
-            duration: '4 weeks',
-            dates: '25 Dec 2017 - 21 Jan 2018',
-            comparison: 'vs. previous 4 weeks',
-            subcategory: 'All product groups',
-            storeFormat: 'All store formats',
-            customerSegment: 'All customer segments',
-            region: 'All regions'
-        },
-        dataViewNeedsUpdating: false,
+type State = {
+    headerHighlighted: boolean,
+    expanded: boolean,
+}
 
-        selectedMeasure: 'Sales value',
-
-        measuresSummaryExpanded: true,
-        measuresInDetailExpanded: true,
-        KPITreesExpanded: false,
-
-        trendGraphExpanded: false,
-        splitBySubcategoryExpanded: false,
-        splitByStoreFormatExpanded: false,
-        splitByCustomerSegmentExpanded: false,
-        splitByRegionExpanded: false,
-
-        measureInDetailBoardHeaderVisible: false,
+export class CollapsibleContentBoard extends React.Component<Props, State> {
+    static defaultProps = {
+        initiallyExpanded: false,
+        rightNode: null,
+        headerIsSticky: false,
     }
-    
-    ...
-    
+
+    constructor(props: Props) {
+        super(props)
+        this.state = {
+            headerHighlighted: false,
+            expanded: props.initiallyExpanded as boolean
+        }
+    }
+
+    headerContainerDiv: HTMLDivElement
+
+    actions = {
+        toggleExpand: () => {
+            this.setState((prevState: State) => ({
+                expanded: !prevState.expanded
+            }))
+        },
+        conditionallyHighlightBoardHeadersBasedOnScrollY: () => {
+            let headerContainingDivBoundingRect = this.headerContainerDiv.getBoundingClientRect() as DOMRect
+
+            this.setState({
+                headerHighlighted: (headerContainingDivBoundingRect.top > -1) ? false : true,
+            })
+        },
+    }
+
+    componentDidMount() {
+        window.addEventListener(
+            'scroll',
+            this.actions.conditionallyHighlightBoardHeadersBasedOnScrollY
+        )
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener(
+            'scroll',
+            this.actions.conditionallyHighlightBoardHeadersBasedOnScrollY
+        )
+    }
+
+    render() {
+        const { props, state, actions } = this
+
+        return (
+            <div
+                className={classNames(
+                    styles.CollapsibleContentBoard,
+                    {
+                        [styles.expanded]: state.expanded,
+                        [styles.headerIsSticky]: props.headerIsSticky,
+                        [styles.headerHighlighted]: state.headerHighlighted
+                    }
+                )}
+            >
+                <div
+                    className={styles.headerContainer}
+                    ref={(element: HTMLDivElement) => { this.headerContainerDiv = element }}
+                >
+                    <div
+                        className={styles.collapseButtonContainer}
+                    >
+                        <CollapseButton
+                            expanded={state.expanded}
+                            handleClick={actions.toggleExpand}
+                        />
+                    </div>
+
+                    <div
+                        className={styles.title}
+                    >
+                        {props.title}
+                    </div>
+
+                    <div
+                        className={styles.rightNodeContainer}
+                    >
+                        {props.rightNode}
+                    </div>
+                </div>
+                
+                {state.expanded &&
+                    <div
+                        className={styles.childrenContainer}
+                    >
+                        {props.children}
+                    </div>
+                }
+            </div>
+        )
+    }
+
 }
 ```
 
 ## Using nesting within the state object
 
-See example above
+Eg
+
+```
+interface Props {
+    selected: {
+        brand: SelectOption<CoffeeBrandValue | TeaBrandValue>
+        category: CategoryOption<'Coffee' | 'Instant coffee'>
+        analysisPeriod: keyof typeof analysisPeriodOptions
+        comparisonPeriod: keyof typeof comparisonPeriodOptions
+        region: keyof typeof regionOptions
+        storeFormat: keyof typeof storeFormatOptions
+    }
+    ...
+}
+```
 
 ### Accessing nested pieces of state within components
 
@@ -89,49 +180,67 @@ export class DataSubtitle extends React.Component<Props, {}> {
 
 ## How the type of state is defined
 
-`AppState`, the type of the state object, is defined in `sharedTypes.ts`.
+I define each component's `ComponentState interface {}` just above the component definition.
 
+I write it manually, then ensure that the state conforms to these types.
+
+Eg
 ```
-export interface AppState {
 
-    // FILTERS SELECTION AND RELATED VIEW-LOGIC
-    selectedFilters?: FiltersSet,
-    displayedFilters?: FiltersSet,
-    dataViewNeedsUpdating?: boolean,
-
-    // SELECTED MEASURE 
-    selectedMeasure?: MeasureName,
-
-    // DEFINES WHICH CONTENT BOARDS ARE EXPANDED
-    measuresSummaryExpanded?: boolean,
-    measuresInDetailExpanded?: boolean,
-    KPITreesExpanded?: boolean,
-
-    // DEFINES WHICH CONTENT MODULES ARE EXPANDED
-    trendGraphExpanded?: boolean,
-    splitBySubcategoryExpanded?: boolean,
-    splitByRegionExpanded?: boolean,
-    splitByStoreFormatExpanded?: boolean,
-    splitByCustomerSegmentExpanded?: boolean,
-
-    // MEASURE IN DETAIL HEADER VISIBLE
-    measureInDetailBoardHeaderVisible?: boolean,
+interface Props {
+    selected: {
+        brand: SelectOption<CoffeeBrandValue | TeaBrandValue>
+        category: CategoryOption<'Coffee' | 'Instant coffee'>
+        analysisPeriod: keyof typeof analysisPeriodOptions
+        comparisonPeriod: keyof typeof comparisonPeriodOptions
+        region: keyof typeof regionOptions
+        storeFormat: keyof typeof storeFormatOptions
+    }
+    handle: {
+        select: {
+            brand: (newlySelectedBrand: SelectOption<CoffeeBrandValue | TeaBrandValue>) => void,
+            category: (newlySelectedCategory: CategoryOption<'Coffee' | 'Instant coffee'>['id']) => void,
+            analysisPeriod: (newlySelectedAnalysisPeriod: keyof typeof analysisPeriodOptions) => void,
+            comparisonPeriod: (newlySelectedComparisonPeriod: keyof typeof comparisonPeriodOptions) => void,
+            region: (newlySelectedRegion: keyof typeof regionOptions) => void,
+            storeFormat: (newlySelectedStoreFormat: keyof typeof storeFormatOptions) => void,
+        }
+    }
 }
+
+export class Sidebar extends React.Component<Props, {}> {
+    render() {
+        const { props } = this
+
+        return (
+            <div
+                className={styles.Sidebar}
+            >
+                <div
+                    className={styles.title}
+                >
+                    Configure view
+                </div>
+
+                <div
+                    className={styles.selectorGroupContainer}
+                >
+                    <div
+                        className={styles.selectorGroupTitle}
+                    >
+                        Brand and category
+                    </div>
+                    
+                    ...
 ```
 
-Then this `AppState` interface is passed into the `App` class definition as the type for its `state` property.
 
-```
-class App extends React.Component<Props, AppState> {
-```
 
 ## How state gets updated via action handlers
 
-State only gets updated when action functions get called.
+__State only gets updated when action functions get called.__
 
-__All action handler functions are stored in an object stored on the `actions` property of the `App` class.__
-
-__And I mean all of them, even those that might never get used by any other component than `App` (e.g. actions triggered by event listeners, which live on `App` as well).__ This is for simplicity: any action that changes state lives on this object.
+__All action handler functions are stored in an object stored on the `actions` property of component which holds the state object that needs to be updated.__
 
 These action function definitions can be grouped into objects stored on the object stored on the `actions` property of the `App` class.
 
@@ -205,8 +314,9 @@ export class DataSubtitle extends React.Component<Props, {}> {
 	}
 ```
 
-## How setState gets called
 
+
+## How setState gets called, within action handlers
 
 ### Updating a root key of the state object
 
@@ -244,42 +354,9 @@ changeSelectedComparison: (newlySelectedComparison: ComparisonOption) => {
 },
 ```
 
-TODO inc why .. as AppState in some cases
-?? WHY Do I need to say 'as AppState'? Or rather, or does this comply to the 'AppState' type?
-
-### Reasons for passing specific props rather than appState, as much as possible
-
-#### Keeping components presentational as much as possible
-Only pass down the state object as much as necessary, not more.
-As soon as possible, components should get purely presentational.
-Do this as soon as possible for each component.
-
-#### Passing just `appState` doesn't allow to pass instance-specific data
-Also, when defining a component class, the definition doesn't know which component instance is called.
-So any piece of data that needs to be instance-specific values (eg. `expanded`) needs to be passed as a separate prop (rather than the component class definition just receiving the wholesale `appState` object).
-
-eg
-
-```
-interface Props {
-    title: string
-    children: React.ReactNode
-
-    // Connecting the component
-    appState: AppState
-    
-    // Instance specific data extracted from appState upstream
-    expanded?: boolean
-    
-    // Instance specific function extracted from actions upstream
-    handleCollapseButtonClick?: React.MouseEventHandler<HTMLElement>
-}
-```
-
 ## Passing down the actions object
 
-The actions are defined in the App class definition, then passed down via props to whatever component instance needs to perform the action.
-
+The actions are defined on the component whose state are updated, then passed down via props to whatever component instance needs to perform the action.
 
 Eg 
 
@@ -326,6 +403,31 @@ actions: {
 
 ...
 
+```
+
+3 When passing these action handlers as props, I need to type the props
+
+```
+interface Props {
+    selected: {
+        brand: SelectOption<CoffeeBrandValue | TeaBrandValue>
+        category: CategoryOption<'Coffee' | 'Instant coffee'>
+        analysisPeriod: keyof typeof analysisPeriodOptions
+        comparisonPeriod: keyof typeof comparisonPeriodOptions
+        region: keyof typeof regionOptions
+        storeFormat: keyof typeof storeFormatOptions
+    }
+    handle: {
+        select: {
+            brand: (newlySelectedBrand: SelectOption<CoffeeBrandValue | TeaBrandValue>) => void,
+            category: (newlySelectedCategory: CategoryOption<'Coffee' | 'Instant coffee'>['id']) => void,
+            analysisPeriod: (newlySelectedAnalysisPeriod: keyof typeof analysisPeriodOptions) => void,
+            comparisonPeriod: (newlySelectedComparisonPeriod: keyof typeof comparisonPeriodOptions) => void,
+            region: (newlySelectedRegion: keyof typeof regionOptions) => void,
+            storeFormat: (newlySelectedStoreFormat: keyof typeof storeFormatOptions) => void,
+        }
+    }
+}
 ```
 
 ## Typing action handler functions arguments
@@ -432,36 +534,11 @@ interface Props {
 
 This loose typing is useful here as different instances of the Selector component will handle data types as different unions of magic strings.
 
-## State management and Atomic Design
 
-Try to only have Organisms aware of `appState`, and distribute all instance-level data and functions from the organism's class definition. **Organisms compose molecules and atoms.**
-
-i.e. 
-
-- Organisms can have access to appState and actions, but not Molecules or Atoms
-
-- Try to expose as much of the lower level components (i.e. Molecules and Atoms) in the class declaration of Organisms (e.g. by embedding components within one another using `props.children`).
-
-This is so that instance-specific data and functions can be passed to lower-level components at the level of the Organism (which knows about `appState`), so that we don't need to let lower level components know about state, so that they are purely presentational.
-
---
-
-#### _Unless_ it's really much a throwaway little component that consumes lots of bits of state
-
-Eg DataSubtible
-```
-<div
-    className={s.subTitle}
->
-    {`${selectedMeasure} • ${duration} • ${dates} ${comparison}`}
-    <br />
-    {`${subcategory} • ${region} • ${storeFormat} • ${customerSegment}`}
-</div>
-```
 
 ## Passing down react nodes as props
 
-1 If I am rolling my own prop (i.e. not children) to pass react nodes to a component, it needs to be only _1_ node. So if I want to pass several, I can wrap them in a `div` or a react fragment `<>`.
+#### If I pass react nodes to a component, what I'm passing needs to be only _1_ node. So if I want to pass several, I can wrap them in a `div` or a react fragment `<>`.
 
 ```
 rightNode={
@@ -480,7 +557,7 @@ rightNode={
 }
 ```
 
-2 In the component that receives the prop, type the prop as `React.ReactNode`, which means 'anything that can be rendered by React`.
+#### In the component that receives the prop, type the prop as `React.ReactNode`, which means 'anything that can be rendered by React`.
 
 ```
 interface Props {
@@ -489,7 +566,7 @@ interface Props {
     rightNode?: React.ReactNode
 ```
 
-3 Then insert the value of the prop using `{ }` in the render return function, just like I do for children props.
+#### Then insert the value of the prop using `{ }` in the render return function, just like I do for children props.
 (I do not need to place it in `<  />`, it will not work).
 
 ```
@@ -516,7 +593,7 @@ interface Props {
 Note: I can use this `{ }` pattern to insert any javascript value, eg a function call that returns a javascript value.
 I can define functions as lightweight components ('almost component', before it becomes one), then call them in the return function.
 
-## Only destructure `const { props } = this`
+## Only destructure `const { props, state, context } = this`
 
 ```
 render() {
@@ -603,3 +680,326 @@ Then, I can call these functions to pass the right value to the selector prop, d
 ```
 
 ![](./assets/dynamicFilterDependencies.png)
+
+
+# Restricting state, for rapid prototyping purposes
+
+Do these three things
+
+#### 1. Limiting on the state type
+
+```
+type State = {
+    selected: {
+        competitor: SelectOption<'Lavazza' | 'Maxwell House'>,
+    }
+}
+```
+
+#### 2. Limiting on the action
+
+```
+    actions = {
+        select: {
+            competitor: (newlySelectedCompetitor: SelectOption<'Lavazza' | 'Maxwell House'>) => {
+                if (!(newlySelectedCompetitor.value === 'Lavazza' || newlySelectedCompetitor.value === 'Maxwell House')) {
+                    window.alert('Prototype: You can only select "Lavazza" or "Maxwell House"')
+
+                } else {
+                    this.setState(
+                        (prevState: State) => ({
+                            selected: {
+                                ...prevState.selected,
+                                competitor: newlySelectedCompetitor
+                            }
+                        })
+                    )
+                }
+
+            },
+        }
+    }
+```
+
+#### 3. Limiting in the assetGetter (i.e. enforcing the same limit in types)
+
+```
+export const histogramFor = (
+    selectedBrand: SelectOption<'Jacobs' | 'Nescafé' | 'Lipton'>,
+    selectedCategory: CategoryOption<'Coffee' | 'Instant coffee'>,
+    selectedCompetitor: SelectOption<'Lavazza' | 'Maxwell House'>
+): string => {
+
+    switch (selectedBrand.value) {
+        case 'Jacobs':
+        case 'Lipton':
+            return svgs.stateDependent.histogram[selectedBrand.value].generic
+
+        case 'Nescafé':
+            return svgs.stateDependent.histogram[selectedBrand.value][selectedCategory.id][selectedCompetitor.value]
+
+        default: return assertNever(selectedBrand.value)
+    }
+}
+```
+    
+
+
+
+
+
+# Using the Context API to avoid passing too many props through too many components
+
+## Use case 1: Avoid passing too many props to a custom component
+
+Eg. Sidebar and DataViewComponent get lots of props, and it's a component that's custom for this prototype.
+In this case, I could use the context API to give them access to all the state and actions it needs.
+
+From this:
+
+```
+<main
+    className={styles.main}
+>
+    <div
+        className={styles.sidebarContainer}
+    >
+        <div
+            className={styles.sidebarStickyContainer}
+        >
+            <Sidebar 
+                selected={{
+                    brand: state.selected.brand,
+                    category: state.selected.category,
+                    analysisPeriod: state.selected.analysisPeriod,
+                    comparisonPeriod: state.selected.comparisonPeriod,
+                    region: state.selected.region,
+                    storeFormat: state.selected.storeFormat,
+                }}
+                handle={{
+                    select: {
+                        brand: actions.select.brand,
+                        category: actions.select.category,
+                        analysisPeriod: actions.select.analysisPeriod,
+                        comparisonPeriod: actions.select.comparisonPeriod,
+                        region: actions.select.region,
+                        storeFormat: actions.select.storeFormat,
+                    }
+                }}
+            />
+        </div>
+    </div>
+
+    <div
+        className={styles.dataViewContainer}
+    >
+        <DataViewComponent
+            selected={{
+                brand: state.selected.brand,
+                category: state.selected.category,
+                analysisPeriod: state.selected.analysisPeriod,
+                comparisonPeriod: state.selected.comparisonPeriod,
+                region: state.selected.region,
+                storeFormat: state.selected.storeFormat,
+            }}
+            loading={state.loading}
+        />
+    </div>
+</main>   
+```
+
+### To this (from a different project):
+
+#### 1 Create a Context component
+
+```
+const Context = React.createContext({
+    state: {
+        screen: <SOnboarding1/>,
+        basket: [] as Array<BasketItem>,
+    },
+    actions: {
+        navigateTo: (nextScreen: React.ReactNode): void => {},
+        addToBasket: (highLevelInfoOfProductToAdd: HighLevelProductInfo): void => {},
+        removeFromBasket: (highLevelInfoOfProductToRemove: HighLevelProductInfo): void => {}
+    }
+})
+```
+
+#### 2 Establish the context provider
+
+```
+interface AppState {
+    screen: React.ReactNode
+    basket: Array<BasketItem>
+}
+class App extends Component<{}, AppState> {
+
+    state = {
+        screen: <SOnboarding1 />,
+        basket: [] as Array<BasketItem>,
+    }
+
+    actions = {
+        navigateTo: (
+            nextScreen: React.ReactNode,
+            targetScrollY: number = 0
+        ) => {
+				...
+        },
+
+        addToBasket: (highLevelInfoOfProductToAdd: HighLevelProductInfo) => {
+				...
+        },
+
+        removeFromBasket: (highLevelInfoOfProductToRemove: HighLevelProductInfo) => {
+            ...
+        }
+    }
+
+    render() {
+        return (
+            <Context.Provider
+                value={{
+                    state: this.state,
+                    actions: this.actions,
+                }}
+            >
+                {this.state.screen}
+            </Context.Provider>
+        )
+    }
+}
+export default App
+
+```
+
+#### 3 Establish the context consumer
+
+Eg 1
+
+```
+class SOnboarding1 extends Component<{}, {}> {
+    render() {
+        return (
+            <Context.Consumer>
+                {context => (
+
+                    <>
+                        <div>
+                            <img
+                                src={require('./assets/onboarding1.png')}
+                                height={300}
+                            />
+                        </div>
+
+                        <div>
+                            Get up to 20 items delivered within 60 minutes
+                        </div>
+
+                        <div>
+                            <button
+                                onClick={() => context.actions.navigateTo(<SOnboarding2 />)}
+                            >
+                                Next
+                            </button>       
+                        </div>
+                    </>
+
+                )}
+            </Context.Consumer>
+        )
+    }
+}
+```
+
+
+Eg 2
+
+```
+class SCategories extends Component<{}, {}> {
+    render() {
+
+        const { props } = this
+
+        return (
+            <Context.Consumer>
+                {context => (
+                    <>
+                        <div>
+                            <a>
+                                Settings
+                            </a>
+                        </div>
+
+                        <div>
+                            Delivering to <a> N1 9BE </a>
+                        </div>
+
+                        <div>
+                            <label>Search</label>
+
+                            <input
+                                type='text'
+                                name='search'
+                                placeholder='What do you need?'
+                            />
+                        </div>
+
+                        {
+                            categories.map(
+                                (category: CategoryWithChildren | CategoryWithoutChildren) => (
+                                    <div
+                                        className='card card--interactive'
+                                        key={category.name}
+                                        onClick={() => {
+                                                if (category.children[0] == undefined) {
+                                                    context.actions.navigateTo(
+                                                        <SProductList 
+                                                            comingFrom={<SCategories {...props} />}
+                                                            leafCategoryName={category.name}
+                                                        />
+                                                    )
+
+                                                } else {
+                                                    context.actions.navigateTo(
+                                                        <SSubCategories
+                                                            categoryName={category.name}
+                                                        />
+                                                    )                                                
+                                                }
+                                            }
+                                        }
+                                    >
+                                        <img
+                                            src={category.images.url}
+                                            width={100}
+                                        />
+                                        
+                                        <p>{category.name}</p>
+                                    </div>
+                                )
+                            )
+                        }
+
+                        <Spacer 
+                            direction='vertical'
+                            amount={80}
+                        />                        
+
+                        {Object.keys(context.state.basket).length > 0 &&
+                            <BasketBar
+                                screenItsPositionedOnIncludingProps={<SCategories {...props} />}
+                            />
+                        }
+                    </>
+                )}
+            </Context.Consumer>
+        )
+    }
+}
+```
+
+
+
+

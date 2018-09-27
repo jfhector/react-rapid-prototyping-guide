@@ -11,6 +11,10 @@ Import the css file into the component. Each component has:
 import * as styles from './App.css'
 ```
 
+Note: I believe that with `create-react-app`, the syntax is just `import './App.css'`. And then, I just name the class names as strings.
+
+
+
 ### Note: If something doesn't work here (eg the CSS module name doesn't get picked up, try restarting the server).
 
 This happened again just now. Just doing a plain CSS Module import (i.e. `import './Button.css'`) didn't report any compile-time error, but the styles never got applied.
@@ -23,9 +27,7 @@ Then I replaced with a standard CSS Module import (i.e. `import './Button.css'`)
 
 
 
-## How to drive style from props
-
-How any conditional / dynamic styling works in my prototypes:
+## How to drive style from props: How any conditional / dynamic styling works in my prototypes:
 
 ### Classes are applied conditionally only to the outermost `div` / element returned by any component
 
@@ -159,8 +161,6 @@ Each prop of tyle union of magic strings has its own marker in the CSS file
 
 #### The conditional className applied to the outermost element of the component drives the styling of elements nested any level further down (rather than just the styling of the outermost element) using the by chaining selectors (with or without `>`)
 
-
-
 Eg 1 from `Alert.css`:
 
 
@@ -185,9 +185,7 @@ Eg 1 from `Alert.css`:
 
 # Tooling
 
-## Use CSS Modules, but __beware that only names are scoped locally__ (not html elements) 
-
-
+## Use CSS Modules, but __beware that only class names are scoped locally__ (not html elements) 
 
 ### What CSS modules do
 
@@ -264,6 +262,7 @@ This would appear as, with a naming conflict:
 This would appear as, without naming conflict:
 
 ![](./assets/classnamesHashedSoRulesetsAreOnlyScopedLocallyToTheComponent.png)
+
 
 
 ## Using the `className` dependency to facilitate applying CSS rulesets conditionally
@@ -344,131 +343,14 @@ className(
 
 
 
-## Using typechecking to ensure that I'm only using CSS rulesets that do exist in the CSS file
-
-`typings-for-css-modules-loader` is a small npm module that is a
-__'Drop-in replacement for css-loader to generate typings for your CSS-Modules on the fly in webpack'__
-
-
-0. Install `typings-for-css-modules-loader` as a devDependency
-
-1. Import each component's CSS file `* as styles`.
-
-```
-import * as styles from './App.css'
-```
-
-2. In my component's render function's return statement, where I'd normally name a CSS class using a string, put `styles.nameOfMyCSSruleSet`
-
-What `typings-for-css-modules-loader` does is create an ambient declaration file with a `string` type declaration for each of the values in the keys of `stylestyles.myClassName`.
-This only works if_ that className exists on the `.css` file.__ (otherwise there's no corresponding key on the `styles` object).
-
-__This allows me to get compile-time warnings if I'm trying to access a key on `styles` that doesn't exist.__
 
 
 
-eg 1: CSS classed applied conditionally to the outermost `div` returned by the component
-```
-<div
-    className={classNames(
-        styles.CollapsibleContentModule,
-        {
-            [styles.expanded]: props.expanded,
-        }
-    )}
->
-	...
-</div>
-```
 
-eg 2
 
-```
-<div
-    className={styles.collapseButtonContainer}
->
-    <CollapseButton
-        expanded={expanded}
-        handleClick={handleCollapseButtonClick}
-    />
 
-</div>
-```
 
-eg3
 
-```
-<button
-    className={classNames(
-        styles.Button,
-        styles[props.typeOption!],
-        styles[props.sizeOption!],
-        {
-            [styles.fullWidth]: props.fullWidth,
-            [styles.disabled]: props.disabled,
-        }
-    )}
-    onClick={!disabled ? handleButtonClick : (() => { console.log('Button was clicked but is disabled') })}
->
-    {children}
-</button>
-```
-
-### When the type of the prop is an union of magic strings, and hence the value of the prop can be one of several strings (and one is always applied), a className is always applied, but which one is applied depends on the value of the prop
-
-```
-interface Props {
-    children: React.ReactNode
-    typeOption?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
-    dismissable?: boolean
-    
-    // State data selected from appState upstream
-    visible: boolean
-
-    // Instance-specific function extracted from actions upstream
-    handleClick?: React.MouseEventHandler<HTMLElement>
-}
-```
-
-```
-return (
-    <button
-        className={classNames(
-            styles.Button,
-            styles[props.typeOption!],
-            styles[props.sizeOption!],
-            {
-                [styles.fullWidth]: props.fullWidth,
-                [styles.disabled]: props.disabled,
-            }
-        )}
-        onClick={!disabled ? handleButtonClick : (() => { console.log('Button was clicked but is disabled') })}
-    >
-        {children}
-    </button>
-)
-```
-
-__Note: `styles[typeOption!]` is for a `typeOption` prop that returns one of several possible strings (as per the Props type), each of which matches a css class in the `.css` file.__
-
-```
-interface Props {
-    children: React.ReactNode
-    disabled?: boolean
-    fullWidth?: boolean
-    typeOption?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
-    sizeOption?: 'small' | 'medium' | 'large'
-
-```
-
-__The `!` is here because TS doesn't know about React's `defaultProps`, so it doesn't know that a value will always be supplied for `typeOption` and `sizeOption`__
-
-#### Note: If something doesn't work here (eg the CSS module name doesn't get picked up, try ..
-1 restarting vscode and the server
-2a doing a basic css module import instead (ie. `import './Button.css'`)
-2b updating the assignment to the `className` tag so that it takes a simple string, without the `styles.` from `typings-for-css-modules-loader`
-3 Putting back the import and class assignment syntax as they need to be with `typings-for-css-modules-loader`
-4 restarting vscode and the server
 
 
 
@@ -602,7 +484,7 @@ Eg 2
 }
 ```
 
-## !! Important note: when different CSS rulesets give conflicting assignment to the same property, the order that matters is the order in which they appear in the `.css` file, now the order of the class names into the `className` tag. !!
+## !! Important note: when different CSS rulesets give conflicting assignment to the same property, the order that matters is the order in which they appear in the `.css` file, not the order of the class names into the `className` tag. !!
 
 Eg:
 
@@ -1196,3 +1078,249 @@ It's not as simple as setting different elements to sticky and hope that they'll
 
 See video ref in `assets` folder: `how sticky elements dont push each other`
 
+
+
+
+
+
+
+
+
+
+
+# Depreciated
+
+## Using typechecking to ensure that I'm only using CSS rulesets that do exist in the CSS file
+I'm stopping using this for a while, as a trial, as I suspect it's too much hassle and mess for the errors that it prevents
+
+`typings-for-css-modules-loader` is a small npm module that is a
+__'Drop-in replacement for css-loader to generate typings for your CSS-Modules on the fly in webpack'__
+
+
+0. Install `typings-for-css-modules-loader` as a devDependency
+
+1. Import each component's CSS file `* as styles`.
+
+```
+import * as styles from './App.css'
+```
+
+2. In my component's render function's return statement, where I'd normally name a CSS class using a string, put `styles.nameOfMyCSSruleSet`
+
+What `typings-for-css-modules-loader` does is create an ambient declaration file with a `string` type declaration for each of the values in the keys of `stylestyles.myClassName`.
+This only works if_ that className exists on the `.css` file.__ (otherwise there's no corresponding key on the `styles` object).
+
+__This allows me to get compile-time warnings if I'm trying to access a key on `styles` that doesn't exist.__
+
+
+
+eg 1: CSS classed applied conditionally to the outermost `div` returned by the component
+```
+<div
+    className={classNames(
+        styles.CollapsibleContentModule,
+        {
+            [styles.expanded]: props.expanded,
+        }
+    )}
+>
+	...
+</div>
+```
+
+eg 2
+
+```
+<div
+    className={styles.collapseButtonContainer}
+>
+    <CollapseButton
+        expanded={expanded}
+        handleClick={handleCollapseButtonClick}
+    />
+
+</div>
+```
+
+eg3
+
+```
+<button
+    className={classNames(
+        styles.Button,
+        styles[props.typeOption!],
+        styles[props.sizeOption!],
+        {
+            [styles.fullWidth]: props.fullWidth,
+            [styles.disabled]: props.disabled,
+        }
+    )}
+    onClick={!disabled ? handleButtonClick : (() => { console.log('Button was clicked but is disabled') })}
+>
+    {children}
+</button>
+```
+
+### When the type of the prop is an union of magic strings, and hence the value of the prop can be one of several strings (and one is always applied), a className is always applied, but which one is applied depends on the value of the prop
+
+```
+interface Props {
+    children: React.ReactNode
+    typeOption?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
+    dismissable?: boolean
+    
+    // State data selected from appState upstream
+    visible: boolean
+
+    // Instance-specific function extracted from actions upstream
+    handleClick?: React.MouseEventHandler<HTMLElement>
+}
+```
+
+```
+return (
+    <button
+        className={classNames(
+            styles.Button,
+            styles[props.typeOption!],
+            styles[props.sizeOption!],
+            {
+                [styles.fullWidth]: props.fullWidth,
+                [styles.disabled]: props.disabled,
+            }
+        )}
+        onClick={!disabled ? handleButtonClick : (() => { console.log('Button was clicked but is disabled') })}
+    >
+        {children}
+    </button>
+)
+```
+
+__Note: `styles[typeOption!]` is for a `typeOption` prop that returns one of several possible strings (as per the Props type), each of which matches a css class in the `.css` file.__
+
+```
+interface Props {
+    children: React.ReactNode
+    disabled?: boolean
+    fullWidth?: boolean
+    typeOption?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
+    sizeOption?: 'small' | 'medium' | 'large'
+
+```
+
+__The `!` is here because TS doesn't know about React's `defaultProps`, so it doesn't know that a value will always be supplied for `typeOption` and `sizeOption`__
+
+#### Note: If something doesn't work here (eg the CSS module name doesn't get picked up, try ..
+1 restarting vscode and the server
+2a doing a basic css module import instead (ie. `import './Button.css'`)
+2b updating the assignment to the `className` tag so that it takes a simple string, without the `styles.` from `typings-for-css-modules-loader`
+3 Putting back the import and class assignment syntax as they need to be with `typings-for-css-modules-loader`
+4 restarting vscode and the server
+
+
+
+
+
+
+# Grid
+
+## Grid within grid
+
+```
+.App {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-areas:
+        "App_header     App_header                  App_header"
+        ".              App_titleRow                ."
+        ".              App_sideBarAndDataView      ."
+        "App_footer     App_footer                  App_footer";
+}
+
+.headerContainer {
+    grid-area: App_header;
+    display: flex;
+    justify-content: center;
+    background-color: var(--color_tuatara);
+}
+
+.titleRow {
+    grid-area: App_titleRow;
+    z-index: 3;
+    margin-top: 30px;
+    margin-bottom: 20px;
+    height: 70px;
+    width: 1158px;
+    padding: 15px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: "titleRow_kebab    titleRow_input      titleRow_button";
+    background-color: white;
+    border-radius: 5px;
+}
+
+.titleRow .kebabContainer {
+    grid-area: titleRow_kebab;
+}
+
+.titleRow .input {
+    grid-area: titleRow_input;
+    height: 40px;
+    margin-left: 15px;
+    margin-right: 15px;
+    font-size: x-large;
+    font-weight: 700;
+    color: var(--textColor_links_active);
+    border: 0;
+}
+
+.titleRow .inputHoldsDefaultValue {
+    color: var(--textColor_grey);
+    font-weight: 300;
+    font-style: italic;
+}
+
+.titleRow .input:focus {
+    color: var(--textColor_grey);
+    font-weight: 300;
+    font-style: normal;
+}
+
+.titleRow .input_savedViewDoesNotReflectCurrentFilters {
+    color: var(--textColor_grey);
+    font-weight: 300;
+    font-style: italic;
+}
+
+.titleRow .button {
+    grid-area: titleRow_button;
+}
+
+.mainSection {
+    grid-area: App_sideBarAndDataView;
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-areas: "mainSection_sideBar   mainSection_dataView";
+    margin-bottom: 50px;
+}
+
+.mainSection .sideBarContainer {
+    grid-area: mainSection_sideBar;
+    position: -webkit-sticky;
+    position: sticky;
+    top: 20px;
+    height: max-content;
+}
+
+.mainSection .dataViewContainer {
+    grid-area: mainSection_dataView;
+    margin-top: -16px;
+}
+
+.footer {
+    grid-area: App_footer;
+    display: flex;
+    justify-content: center;
+    background-color: var(--color_tuatara);
+}
+```

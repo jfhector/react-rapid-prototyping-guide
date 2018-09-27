@@ -1,3 +1,93 @@
+# JS refreshers
+
+## Declaration syntax using string litterals: Using strings as object keys
+
+I can use any string litteral as key for an object directly, when creating an object litteral: `{'any litteral string': 64}`
+
+Eg 1
+```
+const myObj = {
+	'Sales value': 421,
+	'Sales units': 784,
+}
+```
+
+Eg 2
+```
+export const storeFormatOptions = {
+    'All store formats': undefined,
+    'Express stores': undefined,
+    'Metro stores': undefined,
+    'Extra stores': undefined,
+    'Online': undefined
+}
+```
+
+## Object declaration syntax using computed keys (i.e. using strings held in a variable/const)
+
+If I'm using computed strings (i.e. variables/const that evaluate to a string), rather than string litterals, as keys for the object I'm declaring, I need to use the computed keys syntax `{[myComputedKey]: 64}`
+
+Eg 1
+
+```
+const myObj = {
+	[computedKeyOfTypeString]: 64,
+	[otherComputedKeyOfTypeString]: 64,
+}
+```
+
+Eg 2
+
+```
+<button
+    className={classNames(
+        'Button',
+        typeOption,
+        sizeOption,
+        {
+            [s.fullWidth]: fullWidth,
+            [s.disabled]: disabled,
+        }
+    )}
+    onClick={!disabled ? handleButtonClick : (() => { console.log('Button was clicked but is disabled') })}
+>
+    {children}
+</button>
+```
+
+## Array.prototype.filter vs Array.prototype.find
+
+### Array.prototype.filter returns an array! Not an element
+This means I can't use / act on the element directly. I need to access it with the scrubcript syntax first (e.g. `[0]`)
+
+```
+const selectedCategory = categories.filter( category => category.name === props.categoryName )[0] as CategoryWithChildren                           // !! Filter returns an array
+```
+
+### Array.filter.find returns the first matching element
+I can use it / act on it directly
+
+```
+<Stepper 
+    count={
+        (function() {
+            let basketItemCorrespondingToProductIfAny = context.state.basket.find(basketItem => basketItem.highLevelProductInfo.title === props.highLevelProductInfo.title)
+
+            if (basketItemCorrespondingToProductIfAny) {
+                return basketItemCorrespondingToProductIfAny.quantity
+            } else {
+                return 0
+            }
+            
+        })()
+    }
+    item={props.highLevelProductInfo}
+    handleAdd={context.actions.addToBasket}
+    handleRemove={context.actions.removeFromBasket}
+/>  
+```
+
+
 # Using array#map to not repeat myself
 
 Instead of:
@@ -79,7 +169,7 @@ I can use
 
 __Note: I need to provide a type for the array element passed into the map callback (i.e. `(measureOption: MeasureOption)`, and I need parentheses around this before the `->`.__
 
-## When to use this vs RY?
+## When to use this vs repeating myself?
 
 I can easily use this whenever:
 a. the only difference between the component instances I want to render is 1 value that they get as props 
@@ -163,4 +253,88 @@ Eg2: adding a `key` tag to a React component
         }
     </div>
 </CollapsibleContentBoard>
+```
+
+
+
+## Iterating over `true` in a switch statement, to go to the first case that evaluates to true
+
+```
+switch (true) {
+    case remainingMopedVolume(context.state.basket) < 0:
+        return (
+            <>
+                <p>
+                    You are over your space limit by {-remainingMopedVolume(context.state.basket)}%
+                </p>
+
+                <Spacer
+                    direction='vertical'
+                    amount={6}
+                />
+            </>
+        )
+
+    case remainingMopedVolume(context.state.basket) <= 25:
+        return (
+            <>
+                <p>
+                    Remaining space on your moped {remainingMopedVolume(context.state.basket)}%
+                </p>
+
+                <Spacer
+                    direction='vertical'
+                    amount={6}
+                />                                            
+            </>
+        )
+    
+    default:
+        return null
+}
+```
+
+
+## Formatting numbers
+
+```
+<span>
+    {`£${totalPrice(context.state.basket).toFixed(2)}`}
+</span>
+```
+
+
+
+## Using the spread operator to work with arrays (which are reference types) as I would with value types
+
+I did this, and it worked on the surface. I imagine that it works as intended
+
+```
+addToBasket: (highLevelInfoOfProductToAdd: HighLevelProductInfo) => {
+
+    if (numberOfItemsInBasket(this.state.basket) === 20) {
+        window.alert("You've reached your 20-item limit")
+
+        return
+    }
+
+    let copyOfBasket = [...this.state.basket]
+
+    let basketItemCorrespondingToProductToAddIfAny = copyOfBasket.find(
+        basketItem => basketItem.highLevelProductInfo.title === highLevelInfoOfProductToAdd.title
+    )
+
+    if (basketItemCorrespondingToProductToAddIfAny) {
+        basketItemCorrespondingToProductToAddIfAny.quantity += 1
+    } else {
+        copyOfBasket = copyOfBasket.concat({
+            highLevelProductInfo: highLevelInfoOfProductToAdd,
+            quantity: 1,
+        })
+    }
+
+    this.setState({
+        basket: copyOfBasket
+    })
+},
 ```

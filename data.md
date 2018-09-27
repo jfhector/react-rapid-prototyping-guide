@@ -1,7 +1,47 @@
+# Data
 
+# Using array vs using object as a data structure
 
-## Why I represent array data as object, rather than array
+## Option a: Using an array as the root data object
 
+```
+interface ProductStepperProps {
+    highLevelProductInfo: HighLevelProductInfo
+}
+class ProductStepper extends Component<ProductStepperProps, {}> {
+    render() {
+        const { props } = this
+
+        return (
+            <Context.Consumer>
+                {(context) => (
+
+                    <Stepper 
+                        count={
+                            (function() {
+                                let basketItemCorrespondingToProductIfAny = context.state.basket.find(basketItem => basketItem.highLevelProductInfo.title === props.highLevelProductInfo.title)
+
+                                if (basketItemCorrespondingToProductIfAny) {
+                                    return basketItemCorrespondingToProductIfAny.quantity
+                                } else {
+                                    return 0
+                                }
+                                
+                            })()
+                        }
+                        item={props.highLevelProductInfo}
+                        handleAdd={context.actions.addToBasket}
+                        handleRemove={context.actions.removeFromBasket}
+                    />         
+
+                )}
+            </Context.Consumer>
+        )
+    }
+}
+```
+
+## Option b: Using an object as the rool data object, even when the most expected type would be an array (preferred)
 
 ### Eg1. For static selector options
 
@@ -17,6 +57,27 @@ export const durationOptions = {
 __I created `durationOptions` as an object, although I don't need the keys' values and although the `select` html element that will display the options needs an array, not an object, because__:
 - Writing an object, even with unused values, allows me to write the data first and extract the type from it – rather than needing to rewrite the same data again in the type definition.
 - I can get an array from object keys using `Object.keys(..)`
+
+### Eg2: This is what typing data props looks like with this method:
+
+See the last four examples, compared to the top 2
+
+```
+type Props = {
+    selected: {
+        brand: SelectOption<'Jacobs' | 'Nescafé' | 'Lipton'>
+        category: CategoryOption<'Coffee' | 'Instant coffee'>
+        analysisPeriod: keyof typeof analysisPeriodOptions
+        comparisonPeriod: keyof typeof comparisonPeriodOptions
+        region: keyof typeof regionOptions
+        storeFormat: keyof typeof storeFormatOptions
+    },
+    loading?: boolean
+}
+```
+
+The top 2 examples show data stored in custom structures, and typed using a generics (see Typings.md and TS refreshers.md).
+
 
 #### Writing an object, rather than an array, allows me to automatically extra an union type for each of the possible options
 
@@ -166,6 +227,11 @@ export type MedicineSubcategoryOption = keyof typeof categoryHierarchy['MEDICINE
 __Note: notice how I've extracted a type from a subobject of the categoryHierarchy I've defined. I could do this at the level of all subcategories, and below that, which I'd probably do if I had a more complex hierarchy system.__
 
 
+
+
+
+
+
 ## Store raw data, shared types and dataGetter functions in separate files
 
 ### 1 Raw data:
@@ -304,6 +370,9 @@ export function datesOptionsFor(selectedDuration: DurationOption): DateOptionsOb
 
 
 
+
+
+
 ## Create the illusion of more data
 
 I can use a data getter function to return (and populate the app with) different pieces of data for different pieces of the app state.
@@ -379,6 +448,10 @@ export const dataForAllMeasuresBasedOnAppState4 = { ... }
 
 ```
 
+
+
+
+
 ### 2. Create a data getter function that returns one of these alternate data based on app state
 
 ```
@@ -414,6 +487,7 @@ switch (numberFrom0To4) {
 }
 ```
 
+
 ### 2. In a connected component (i.e. one that knows about appState), use this function: call this function to assign its return value on a prop passed down into the presentational component that will use the data
 
 ```
@@ -424,3 +498,461 @@ switch (numberFrom0To4) {
     handleKpiTileClick={actions.selectionChanges.changeSelectedMeasure}
 />
 ```
+
+
+
+
+
+
+
+
+# Easily making more complex data structures
+
+```
+// TYPES
+
+export type CoffeeBrandValue =
+    'Carte Noire' |
+    'Douwe Egberts' |
+    'Folgers' |
+    'Illy' |
+    'Jacobs' |
+    'Kenco' |
+    'Lavazza' |
+    'Maxwell House' |
+    'Moccona' |
+    'Mount Hagen' |
+    'Nescafé' |
+    'Starbucks' |
+    'Tasters Choice'
+
+export type TeaBrandValue =
+    'Lipton' |
+    'PG Tips' |
+    'Typhoo' |
+    'Twinings'|
+    'Clipper tea'
+
+
+export type MeasureValue =
+    'Sales value' |
+    'Sales units' |
+    'Share of category' |
+    'Av. price per unit' |
+    '% sold on promotion' |
+    'Rate of sale' |
+    'Stores selling'
+
+export type SelectOption<T extends MeasureValue | CoffeeBrandValue | TeaBrandValue> = {
+    label: string,
+    value: T
+}
+
+// DATA
+
+// brandOptions
+
+export const brandOptions: SelectOption<CoffeeBrandValue | TeaBrandValue>[] = [
+    {
+        label: 'Carte Noire',
+        value: 'Carte Noire'
+    },
+    {
+        label: 'Clipper tea',
+        value: 'Clipper tea'
+    },
+    {
+        label: 'Douwe Egberts',
+        value: 'Douwe Egberts'
+    },    
+    {
+        label: 'Folgers',
+        value: 'Folgers'
+    },
+    {
+        label: 'Illy',
+        value: 'Illy'
+    },
+    {
+        label: 'Jacobs',
+        value: 'Jacobs',
+    },
+    {
+        label: 'Kenco',
+        value: 'Kenco'
+    },
+    {
+        label: 'Lavazza',
+        value: 'Lavazza'
+    },
+    {
+        label: 'Lipton',
+        value: 'Lipton'
+    },
+    {
+        label: 'Maxwell House',
+        value: 'Maxwell House'
+    },
+    {
+        label: 'Moccona',
+        value: 'Moccona'
+    },
+    {
+        label: 'Mount Hagen',
+        value: 'Mount Hagen'
+    },
+    {
+        label: 'Nescafé',
+        value: 'Nescafé'
+    },
+    {
+        label: 'PG Tips',
+        value: 'PG Tips'
+    },
+    {
+        label: 'Starbucks',
+        value: 'Starbucks'
+    },
+    {
+        label: 'Tasters Choice',
+        value: 'Tasters Choice'
+    },
+    {
+        label: 'Typhoo',
+        value: 'Typhoo'
+    },
+    {
+        label: 'Twinings',
+        value: 'Twinings'
+    },
+]
+
+// coffeeBrandOptions for competitor selector
+
+export const coffeeBrandOptions: SelectOption<CoffeeBrandValue>[] = [
+    {
+        label: 'Carte Noire',
+        value: 'Carte Noire'
+    },
+    {
+        label: 'Douwe Egberts',
+        value: 'Douwe Egberts'
+    },    
+    {
+        label: 'Folgers',
+        value: 'Folgers'
+    },
+    {
+        label: 'Illy',
+        value: 'Illy'
+    },
+    {
+        label: 'Jacobs',
+        value: 'Jacobs',
+    },
+    {
+        label: 'Kenco',
+        value: 'Kenco'
+    },
+    {
+        label: 'Lavazza',
+        value: 'Lavazza'
+    },
+    {
+        label: 'Maxwell House',
+        value: 'Maxwell House'
+    },
+    {
+        label: 'Moccona',
+        value: 'Moccona'
+    },
+    {
+        label: 'Mount Hagen',
+        value: 'Mount Hagen'
+    },
+    {
+        label: 'Nescafé',
+        value: 'Nescafé'
+    },
+    {
+        label: 'Starbucks',
+        value: 'Starbucks'
+    },
+    {
+        label: 'Tasters Choice',
+        value: 'Tasters Choice'
+    },
+]
+
+// measureOptions
+
+export const measureOptions: SelectOption<MeasureValue>[] = [
+    {
+        label: 'Sales value',
+        value: 'Sales value',
+    },
+    {
+        label: 'Sales units',
+        value: 'Sales units',
+    },
+    {
+        label: 'Share of category',
+        value: 'Share of category',
+    },
+    {
+        label: 'Av. price per unit',
+        value: 'Av. price per unit',
+    },
+    {
+        label: '% sold on promotion',
+        value: '% sold on promotion',
+    },
+    {
+        label: 'Rate of sale',
+        value: 'Rate of sale',
+    },
+    {
+        label: 'Stores selling',
+        value: 'Stores selling',
+    },
+]
+
+// IMMUTABLE IN V1 OF PROTOTYPE
+// THESE DON'T USE REACT-SELECT, SO I USE A CUSTOM DATA OBJECT
+// TODO: LEARN HOW TO ADD THE CARET TO REACT SELECT WITHOUT FUSS, THEN CONVERT ALL SELECTORS TO REACT SELECT
+
+export const analysisPeriodOptions = {
+    'Last week': undefined,
+    'Last 4 weeks': undefined,
+    'Year to date': undefined,
+}
+
+export const comparisonPeriodOptions = {
+    'vs. last year': undefined,
+    'vs. previous period': undefined,
+}
+
+export const regionOptions = {
+    'All regions': undefined,
+    'North': undefined,
+    'East': undefined,
+    'South': undefined,
+    'West': undefined,
+}
+
+export const storeFormatOptions = {
+    'All store formats': undefined,
+    'Express stores': undefined,
+    'Metro stores': undefined,
+    'Extra stores': undefined,
+    'Online': undefined,
+}
+
+```
+
+
+
+# Representing a category hierarchy
+
+```
+// TYPES
+
+export type CategoryId =
+    'Ground coffee' |
+    'Instant coffee' |
+    'Decaf coffee' |
+    'Coffee pods' |
+    'Iced coffee' |
+    'Coffee beans' |
+    'Capucino latte and mocha' |
+    'Coffee' |
+    'Instant tea' |
+    'Fruit and herbal tea' |
+    'White tea' |
+    'Green tea' |
+    'Black tea' |
+    'Redbush tea' |
+    'Tea' |
+    'Drinks'
+
+export type CategoryOption<T extends CategoryId> = {
+    id: T;
+    name: string;
+    parentGroupId: string;
+    subGroups: Array<CategoryOption<CategoryId>>;
+    hierarchyLevel: number;
+}
+
+// DATA
+
+const groundCoffeeCategory: CategoryOption<'Ground coffee'> = {
+    id: 'Ground coffee',
+    name: 'Ground coffee',
+    parentGroupId: 'coffee',
+    subGroups: [],
+    hierarchyLevel: 2,
+}
+
+const instantCoffeeCategory: CategoryOption<'Instant coffee'> = {
+    id: 'Instant coffee',
+    name: 'Instant coffee',
+    parentGroupId: 'coffee',
+    subGroups: [],
+    hierarchyLevel: 2,
+}
+
+const decafCoffeeCategory: CategoryOption<'Decaf coffee'> = {
+    id: 'Decaf coffee',
+    name: 'Decaf coffee',
+    parentGroupId: 'coffee',
+    subGroups: [],
+    hierarchyLevel: 2,
+}
+
+const coffeePodsCategory: CategoryOption<'Coffee pods'> = {
+    id: 'Coffee pods',
+    name: 'Coffee pods',
+    parentGroupId: 'coffee',
+    subGroups: [],
+    hierarchyLevel: 2,
+}
+
+const icedCoffeeCategory: CategoryOption<'Iced coffee'> = {
+    id: 'Iced coffee',
+    name: 'Iced coffee',
+    parentGroupId: 'coffee',
+    subGroups: [],
+    hierarchyLevel: 2,
+}
+
+const coffeeBeansCategory: CategoryOption<'Coffee beans'> = {
+    id: 'Coffee beans',
+    name: 'Coffee beans',
+    parentGroupId: 'coffee',
+    subGroups: [],
+    hierarchyLevel: 2,
+}
+
+const capucinoLatteAndMochaCategory: CategoryOption<'Capucino latte and mocha'> = {
+    id: 'Capucino latte and mocha',
+    name: 'Capucino latte and mocha',
+    parentGroupId: 'coffee',
+    subGroups: [],
+    hierarchyLevel: 2,
+}
+
+const coffeeCategory: CategoryOption<'Coffee'> = {
+    id: 'Coffee',
+    name: 'Coffee',
+    parentGroupId: 'Drinks',
+    subGroups: [
+        groundCoffeeCategory,
+        instantCoffeeCategory,
+        decafCoffeeCategory,
+        coffeePodsCategory,
+        icedCoffeeCategory,
+        coffeeBeansCategory,
+        capucinoLatteAndMochaCategory,
+    ],
+    hierarchyLevel: 1,
+}
+
+const instantTea: CategoryOption<'Instant tea'> = {
+    id: 'Instant tea',
+    name: 'Instant tea',
+    parentGroupId: 'Tea',
+    subGroups: [],
+    hierarchyLevel: 2,
+}
+
+const fruitAndHerbalTea: CategoryOption<'Fruit and herbal tea'> = {
+    id: 'Fruit and herbal tea',
+    name: 'Fruit and herbal tea',
+    parentGroupId: 'Tea',
+    subGroups: [],
+    hierarchyLevel: 2,
+}
+
+const whiteTea: CategoryOption<'White tea'> = {
+    id: 'White tea',
+    name: 'White tea',
+    parentGroupId: 'Tea',
+    subGroups: [],
+    hierarchyLevel: 2,
+}
+
+const greenTea: CategoryOption<'Green tea'> = {
+    id: 'Green tea',
+    name: 'Green tea',
+    parentGroupId: 'Tea',
+    subGroups: [],
+    hierarchyLevel: 2,
+}
+
+const blackTea: CategoryOption<'Black tea'> = {
+    id: 'Black tea',
+    name: 'Black tea',
+    parentGroupId: 'Tea',
+    subGroups: [],
+    hierarchyLevel: 2,
+}
+
+const redbushTea: CategoryOption<'Redbush tea'> = {
+    id: 'Redbush tea',
+    name: 'Redbush tea',
+    parentGroupId: 'Tea',
+    subGroups: [],
+    hierarchyLevel: 2,
+}
+
+const teaCategory: CategoryOption<'Tea'> = {
+    id: 'Tea',
+    name: 'Tea',
+    parentGroupId: 'Drinks',
+    subGroups: [
+        instantTea,
+        fruitAndHerbalTea,
+        whiteTea,
+        greenTea,
+        blackTea,
+        redbushTea,
+    ],
+    hierarchyLevel: 1,
+}
+
+export const drinksCategory: CategoryOption<'Drinks'> = {
+    id: 'Drinks',
+    name: 'Drinks',
+    parentGroupId: 'no_parent',
+    subGroups: [coffeeCategory, teaCategory],
+    hierarchyLevel: 0,
+}
+
+// Helper
+
+export const categoryIdsToObjects = {
+    'Drinks': drinksCategory,
+    'Coffee': coffeeCategory,
+    'Capucino latte and mocha': capucinoLatteAndMochaCategory,
+    'Coffee beans': coffeeBeansCategory,
+    'Iced coffee': icedCoffeeCategory,
+    'Coffee pods': coffeePodsCategory,
+    'Decaf coffee': decafCoffeeCategory,
+    'Instant coffee': instantCoffeeCategory,
+    'Ground coffee': groundCoffeeCategory,
+}
+
+```
+
+
+
+# JSON vs JS objects
+
+I haven't figured out how to import JSON objects in my code.
+
+Instead, I manually convert whatever JSON I have in my source folder, to a JS equivalent.
+
+Just add this at the beginning of the file:
+
+`export const categoriesJSON = `
+

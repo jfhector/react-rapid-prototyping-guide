@@ -58,3 +58,9 @@ componentWillUnmount() {
 
 –– As an another example, I could use Element.getBoundingClientRect() to create an action that sets state based on whether the element's bounding client rect top value is less then less than its height (meaning it has completely scroll out of view at the top).
 
+
+
+
+
+
+// TODO: ADD WHAT I'VE LEARNT PROTOTYPING VIEW CONFIGURATION

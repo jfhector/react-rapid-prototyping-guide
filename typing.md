@@ -1,19 +1,266 @@
 
 # Typing
 
-## Where type definitions are located
+# Where type definitions are located
 
 These are the types that a component might use, and where the type defintions are located:
 
-#### `Props` type is defined locally in each component file, before the type definition.
+## Props types and State types are defined above each components declaration – if they need it
 
-Each component file (including the root `App` component), has a `Prop` interface definition before the class definion.
-This interface is then passed to the component's definition as the type for its props.
+eg 
 
-#### Any types other than `Props` are defined in `sharedTypes.ts` as they will (potentially) be shared across multiple files / components.
+```
+interface MyComponentProps { ... }
 
-This includes `AppState`, `Actions` and `RefAssignmentFunctions`. Each of these types are defined in `sharedTypes` and exported from there.
+interface MyComponentState { ... }
 
+export class MyComponent extends React.Component<MyComponentProps, MyComponentState> { ... }
+```
+
+## Actions and ref assignment functions are typed as part of their definition, and as part of the prop typing when they're passed as props
+
+Eg
+
+```
+interface Props {
+    selected: {
+        brand: SelectOption<CoffeeBrandValue | TeaBrandValue>
+        category: CategoryOption<'Coffee' | 'Instant coffee'>
+        analysisPeriod: keyof typeof analysisPeriodOptions
+        comparisonPeriod: keyof typeof comparisonPeriodOptions
+        region: keyof typeof regionOptions
+        storeFormat: keyof typeof storeFormatOptions
+    }
+    handle: {
+        select: {
+            brand: (newlySelectedBrand: SelectOption<CoffeeBrandValue | TeaBrandValue>) => void,
+            category: (newlySelectedCategory: CategoryOption<'Coffee' | 'Instant coffee'>['id']) => void,
+            analysisPeriod: (newlySelectedAnalysisPeriod: keyof typeof analysisPeriodOptions) => void,
+            comparisonPeriod: (newlySelectedComparisonPeriod: keyof typeof comparisonPeriodOptions) => void,
+            region: (newlySelectedRegion: keyof typeof regionOptions) => void,
+            storeFormat: (newlySelectedStoreFormat: keyof typeof storeFormatOptions) => void,
+        }
+    }
+}
+```
+
+## Types of some data is defined in the same file as the data, at the top
+Unless all the types I need can be immediately inferred from the data, in which case I don't need a type definition
+
+Eg
+```
+// TYPES
+
+export type CoffeeBrandValue =
+    'Carte Noire' |
+    'Douwe Egberts' |
+    'Folgers' |
+    'Illy' |
+    'Jacobs' |
+    'Kenco' |
+    'Lavazza' |
+    'Maxwell House' |
+    'Moccona' |
+    'Mount Hagen' |
+    'Nescafé' |
+    'Starbucks' |
+    'Tasters Choice'
+
+export type TeaBrandValue =
+    'Lipton' |
+    'PG Tips' |
+    'Typhoo' |
+    'Twinings'|
+    'Clipper tea'
+
+
+export type MeasureValue =
+    'Sales value' |
+    'Sales units' |
+    'Share of category' |
+    'Av. price per unit' |
+    '% sold on promotion' |
+    'Rate of sale' |
+    'Stores selling'
+
+export type SelectOption<T extends MeasureValue | CoffeeBrandValue | TeaBrandValue> = {
+    label: string,
+    value: T
+}
+
+// DATA
+
+// brandOptions
+
+export const brandOptions: SelectOption<CoffeeBrandValue | TeaBrandValue>[] = [
+    {
+        label: 'Carte Noire',
+        value: 'Carte Noire'
+    },
+    {
+        label: 'Clipper tea',
+        value: 'Clipper tea'
+    },
+    {
+        label: 'Douwe Egberts',
+        value: 'Douwe Egberts'
+    },    
+    {
+        label: 'Folgers',
+        value: 'Folgers'
+    },
+    {
+        label: 'Illy',
+        value: 'Illy'
+    },
+    {
+        label: 'Jacobs',
+        value: 'Jacobs',
+    },
+    {
+        label: 'Kenco',
+        value: 'Kenco'
+    },
+    {
+        label: 'Lavazza',
+        value: 'Lavazza'
+    },
+    {
+        label: 'Lipton',
+        value: 'Lipton'
+    },
+    {
+        label: 'Maxwell House',
+        value: 'Maxwell House'
+    },
+    {
+        label: 'Moccona',
+        value: 'Moccona'
+    },
+    {
+        label: 'Mount Hagen',
+        value: 'Mount Hagen'
+    },
+    {
+        label: 'Nescafé',
+        value: 'Nescafé'
+    },
+    {
+        label: 'PG Tips',
+        value: 'PG Tips'
+    },
+    {
+        label: 'Starbucks',
+        value: 'Starbucks'
+    },
+    {
+        label: 'Tasters Choice',
+        value: 'Tasters Choice'
+    },
+    {
+        label: 'Typhoo',
+        value: 'Typhoo'
+    },
+    {
+        label: 'Twinings',
+        value: 'Twinings'
+    },
+]
+
+// coffeeBrandOptions for competitor selector
+
+export const coffeeBrandOptions: SelectOption<CoffeeBrandValue>[] = [
+    {
+        label: 'Carte Noire',
+        value: 'Carte Noire'
+    },
+    {
+        label: 'Douwe Egberts',
+        value: 'Douwe Egberts'
+    },    
+    {
+        label: 'Folgers',
+        value: 'Folgers'
+    },
+    {
+        label: 'Illy',
+        value: 'Illy'
+    },
+    {
+        label: 'Jacobs',
+        value: 'Jacobs',
+    },
+    {
+        label: 'Kenco',
+        value: 'Kenco'
+    },
+    {
+        label: 'Lavazza',
+        value: 'Lavazza'
+    },
+    {
+        label: 'Maxwell House',
+        value: 'Maxwell House'
+    },
+    {
+        label: 'Moccona',
+        value: 'Moccona'
+    },
+    {
+        label: 'Mount Hagen',
+        value: 'Mount Hagen'
+    },
+    {
+        label: 'Nescafé',
+        value: 'Nescafé'
+    },
+    {
+        label: 'Starbucks',
+        value: 'Starbucks'
+    },
+    {
+        label: 'Tasters Choice',
+        value: 'Tasters Choice'
+    },
+]
+
+// measureOptions
+
+export const measureOptions: SelectOption<MeasureValue>[] = [
+    {
+        label: 'Sales value',
+        value: 'Sales value',
+    },
+    {
+        label: 'Sales units',
+        value: 'Sales units',
+    },
+    {
+        label: 'Share of category',
+        value: 'Share of category',
+    },
+    {
+        label: 'Av. price per unit',
+        value: 'Av. price per unit',
+    },
+    {
+        label: '% sold on promotion',
+        value: '% sold on promotion',
+    },
+    {
+        label: 'Rate of sale',
+        value: 'Rate of sale',
+    },
+    {
+        label: 'Stores selling',
+        value: 'Stores selling',
+    },
+]
+```
+
+## When a type is going to be used across several files, or doesn't correspond to any one particular component, it is defined in `sharedTypes.ts`
+
+But often that doesn't happen, as all the previous cases should handle all cases (e.g. data being defined on top of a data file).
 
 ## When to declare types inferred from pre-written data objects, and when to declare types written from scratch
 
@@ -459,7 +706,11 @@ So I write it from scratch from `MeasureData` and `MeasureOption` like this:
 export type KpisDataForAllMeasures = {[K in MeasureOption]: MeasureData}
 ```
 
-## Use a module file rather than a TS script file or an ambient declaration file
+
+
+
+
+# `sharedTypes.ts`: Use a module file rather than an ambient declaration file, to define shared types
 
 Note: I use a module file, rather than a typescript script file or an ambient declaration file, because:
 
@@ -469,12 +720,18 @@ Note: I use a module file, rather than a typescript script file or an ambient de
 
 See [this stack overflow](https://stackoverflow.com/questions/42233987/how-to-configure-custom-global-interfaces-d-ts-files-for-typescript?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa).
 
-## Importing type definitions where they are needed
+
+
+# Importing type definitions where they are needed
 
 eg from a component file (Sidebar.tsx)
 ```
 import { DurationOption, DateOption, ComparisonOption, MedicineSubcategoryName, RegionOption, StoreFormatOption, CustomerSegmentOption } from '../../../sharedTypes'
 ```
+
+
+
+
 
 # Useful TypeScript patterns for rapid prototyping
 
@@ -490,6 +747,8 @@ export type DurationOption =
 ```
 
 Means that a variable of type `DurationOption` can only have one of these 4 string values.
+
+
 
 ## Defining types for a category hierarchy
 
@@ -563,39 +822,42 @@ In sharedTypes.ts:
 export type MedicineSubcategoryName = keyof typeof categoryHierarchy['MEDICINE']
 ```
 
-## Ensuring exhaustic `switch`
+
+
+## Ensuring exhaustivity in `switch` blocks
 
 TS allows me to automatically check, at compile time, that my `switch` cases are exhaustive.
 
-The way to do this is to __declare a `const` arbitrarily named `_exhaustiveCheck` of type `never` in the switch block's `default` case, and assign it the value I'm using as a switch.__
+#### How to do it
 
-Eg
+1. Define a function like this in a `utils` folder
+
+`export function assertNever(arg: never) { return arg }`
+
+2. When I write a switch block, to ensure that I've handled all the cases before reaching `default`, use the `default:` case to pass in the value I'm interating over to the `assertNever( )` function
 
 ```
-<img
-    src={
-        (function () {
-            switch (appState.selectedMeasure) {
-                case 'Sales value':
-                case 'Basket penetration':
-                    return PROTOIMG_graph_salesValue
-                case 'Spend per customer':
-                case 'Frequency of purchase':
-                case 'Sales units':
-                    return PROTOIMG_graph_spendPerCustomer
-                case 'Customers':
-                case 'Retailer visits':
-                    return PROTOIMG_graph_customers
-                case 'Spend per visit':
-                case 'Units per visit':
-                    return PROTOIMG_graph_spendPerVisit
-                default:
-                    const _exhaustiveCheck: never = appState.selectedMeasure
-            }
-        })()
+export const histogramFor = (
+    selectedBrand: SelectOption<'Jacobs' | 'Nescafé' | 'Lipton'>,
+    selectedCategory: CategoryOption<'Coffee' | 'Instant coffee'>,
+    selectedCompetitor: SelectOption<'Lavazza' | 'Maxwell House'>
+): string => {
+
+    switch (selectedBrand.value) {
+        case 'Jacobs':
+        case 'Lipton':
+            return svgs.stateDependent.histogram[selectedBrand.value].generic
+
+        case 'Nescafé':
+            return svgs.stateDependent.histogram[selectedBrand.value][selectedCategory.id][selectedCompetitor.value]
+
+        default: return assertNever(selectedBrand.value)
     }
-/>
+}
+
 ```
+
+#### Why does this work?
 
 The reason this works is that:
 
@@ -612,34 +874,13 @@ Note: a function with return type `never` (i.e. a function that never returns) i
 
 - a variable/const of type `never` can only be assigned to another variable/const of type `never`.
 
-- so if my switch cases are _exhaustive_ before the `default` case, the variable/const I'm switching on (eg here `appState.selectedMeasure`), placed in the `default` block, _will not return any assignment value_, so I can assign it to `const _exhaustiveCheck: never`.
+- so if my switch cases are _exhaustive_ before the `default` case, the variable/const I'm switching on (eg here `appState.selectedMeasure`), placed in the `default` block, _will not return any assignment value_, so I can assign it to `arg: never`.
 
-- but on the other hand if my switch cases are _not exhaustive before_ the `default` case, the variable/const I'm switching on, placed in the `default` block, _will return a value_, so it can't be assigned to `const _exhaustiveCheck: never` and I get a helpful compile time error.
+- but on the other hand if my switch cases are _not exhaustive before_ the `default` case, the variable/const I'm switching on, placed in the `default` block, _will return a value_, so it can't be assigned to `arg: never` and I get a helpful compile time error.
 
-### Note: If I use the `const _exhaustiveCheck: never = valueImSwitchingOn` pattern inside a function and `strictNullChecks` is on, I need to return `_exhaustiveCheck`
+### Note: If the function expects a return value, I need to return a value, so don't forget to return the result of the call to assertNever( ) (which returns never)
 
-Otherwise TS complains that the function might return undefined, and hence that the return type of the function is wrong.
-
-Eg:
-
-```
-export function comparisonOptionsFor(selectedDuration: DurationOption): ComparisonOptionsObject {
-    switch (selectedDuration) {
-        case '52 weeks': 
-            return comparisonOptionsFor52WeekDuration
-        case '26 weeks': 
-            return comparisonOptionsFor26WeekDuration
-        case '12 weeks': 
-            return comparisonOptionsFor12WeekDuration
-        case '4 weeks': 
-            return comparisonOptionsFor4WeekDuration
-        default:
-            const _exhaustiveCheck: never = selectedDuration
-            return _exhaustiveCheck
-    }
-}
-```
-### Note: I can use this pattern with `if () else if () else ()` blocks as well.
+#### Note: I can use this pattern with `if () else if () else ()` blocks as well.
 
 I.e. treat the final `else` in the same way I treat `default` above.
 
@@ -661,6 +902,9 @@ function area(s: Shape) {
     }
 }
 ```
+
+
+
 
 ## Using type assertion
 
@@ -705,134 +949,326 @@ switch (intFrom0To4) {
 }
 ```
 
-
-## Typing action handler functions and their arguments
-
-See in State Management
-
-
-
-## Cheat sheet of types
-
-### Specific React typings that get used in my prototypes
-
-#### Mouse event handlers
-
-```
-interface Props {
-    // Instance-specific data extracted from appState upsteam
-    expanded?: boolean
-
-    // Instance-specific function extracted from actions upstream
-    handleClick?: React.MouseEventHandler<HTMLElement>
-}
-```
-
-#### Children props (or anything renderable by React)
-
-If a prop can contain 'anything that can be rendered by React` (e.g. a children prop), the type of `React.ReactNode`
-
-```
-interface Props {
-    children: React.ReactNode
-    typeOption?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
-    dismissable?: boolean
-```
-
-### Other types
-
-The type of an array of string is `string[]` (not `[string]` as a Swift).
-
-## Freshness 
-
-(Source: [Basarat's chapter on Freshness](https://basarat.gitbooks.io/typescript/content/docs/types/freshness.html))
-
-### What's the rule? 
-
-__Object litterals must only have _known_ properties of the interface / inline type they need to conform to.___
-
-If a function argument must conform to an interface, which lists properties `x` and `y` (eg),
-then:
-.. __a variable/const__ passed as an argument __must have__ the properties `x` and `y` (i.e. similar to implementing a protocol in Swift)
-.. __an object literal__ passed as an argument __must only have__ the properties `x` and `y`. (i.e. object literals must only specify known properties)
-
-Eg with a variable:
-
-```
-function logName(something: { name: string }) {
-    console.log(something.name);
-}
-
-var person = { name: 'matt', job: 'being awesome' };
-var animal = { name: 'cow', diet: 'vegan, but has milk of own species' };
-var random = { note: `I don't have a name property` };
-
-logName(person); // okay
-logName(animal); // okay
-logName(random); // Error: property `name` is missing
-```
-
-Eg with an object litteral: 
-
-```
-function logName(something: { name: string }) {
-    console.log(something.name);
-}
-
-logName({ name: 'matt' }); // okay
-logName({ name: 'matt', job: 'being awesome' }); // Error: object literals must only specify known properties. `job` is excessive here.
-```
-
-Note: __object literals must only specify known properties__. This means that an object litteral passed into a function as an argument can only have the properties (optional or not) described in the interface (or inline type).
-
-### What's the use case?
-
-__Freshness avoid typos, by requiring that object litterals to only have known properties.__
+### Eg using type assertion to tip the compiler we the type of a state
 
 Eg
+```
+type Props = {
+    title: string
+    children: React.ReactNode
+    headerIsSticky?: boolean
+    rightNode?: React.ReactNode
+    initiallyExpanded?: boolean
+}
+
+type State = {
+    headerHighlighted: boolean,
+    expanded: boolean,
+}
+
+export class CollapsibleContentBoard extends React.Component<Props, State> {
+    static defaultProps = {
+        initiallyExpanded: false,
+        rightNode: null,
+        headerIsSticky: false,
+    }
+
+    constructor(props: Props) {
+        super(props)
+        this.state = {
+            headerHighlighted: false,
+            expanded: props.initiallyExpanded as boolean
+        }
+    }
+```
+
+
+## Using generics to easily handle more complex types
+
+1. If I define types that can be one of several string values:
 
 ```
-function logIfHasName(something: { name?: string }) {
-    if (something.name) {
-        console.log(something.name);
+export type CoffeeBrandValue =
+    'Carte Noire' |
+    'Douwe Egberts' |
+    'Folgers' |
+    'Illy' |
+    'Jacobs' |
+    'Kenco' |
+    'Lavazza' |
+    'Maxwell House' |
+    'Moccona' |
+    'Mount Hagen' |
+    'Nescafé' |
+    'Starbucks' |
+    'Tasters Choice'
+
+export type TeaBrandValue =
+    'Lipton' |
+    'PG Tips' |
+    'Typhoo' |
+    'Twinings'|
+    'Clipper tea'
+
+export type MeasureValue =
+    'Sales value' |
+    'Sales units' |
+    'Share of category' |
+    'Av. price per unit' |
+    '% sold on promotion' |
+    'Rate of sale' |
+    'Stores selling'
+```
+
+2. I can then define a Generic type, that takes one of these more granular types (or an union of them) as a parameter:
+
+```
+export type SelectOption<T extends MeasureValue | CoffeeBrandValue | TeaBrandValue> = {
+    label: string,
+    value: T
+}
+```
+
+3. And then, with this, I can get types for these more complex objects:
+
+And I can say: 'This is a select option, but the value can only be
+- eg1: a coffee brand
+- eg2: a coffee brand or a tea brand
+- eg3: a measure
+- eg4: 'Jacobs', 'Nescafé' or 'Lipton' (this works because this set is included in `MeasureValue | CoffeeBrandValue | TeaBrandValue`)
+- eg5: 'Coffee' or 'Instant coffee' (this works because this set is included in `MeasureValue | CoffeeBrandValue | TeaBrandValue`)
+- eg6: 'Lavazza' or 'Maxwell House' (this works because this set is included in `MeasureValue | CoffeeBrandValue | TeaBrandValue`)
+
+Eg 1:
+
+```
+export const coffeeBrandOptions: SelectOption<CoffeeBrandValue>[] = [
+    {
+        label: 'Carte Noire',
+        value: 'Carte Noire'
+    },
+    {
+        label: 'Douwe Egberts',
+        value: 'Douwe Egberts'
+    },    
+    {
+        label: 'Folgers',
+        value: 'Folgers'
+    },
+    {
+        label: 'Illy',
+        value: 'Illy'
+    },
+    {
+        label: 'Jacobs',
+        value: 'Jacobs',
+    },
+    {
+        label: 'Kenco',
+        value: 'Kenco'
+    },
+    {
+        label: 'Lavazza',
+        value: 'Lavazza'
+    },
+    {
+        label: 'Maxwell House',
+        value: 'Maxwell House'
+    },
+    {
+        label: 'Moccona',
+        value: 'Moccona'
+    },
+    {
+        label: 'Mount Hagen',
+        value: 'Mount Hagen'
+    },
+    {
+        label: 'Nescafé',
+        value: 'Nescafé'
+    },
+    {
+        label: 'Starbucks',
+        value: 'Starbucks'
+    },
+    {
+        label: 'Tasters Choice',
+        value: 'Tasters Choice'
+    },
+]
+```
+
+Eg2
+
+```
+export const brandOptions: SelectOption<CoffeeBrandValue | TeaBrandValue>[] = [
+    {
+        label: 'Carte Noire',
+        value: 'Carte Noire'
+    },
+    {
+        label: 'Clipper tea',
+        value: 'Clipper tea'
+    },
+    {
+        label: 'Douwe Egberts',
+        value: 'Douwe Egberts'
+    },    
+    {
+        label: 'Folgers',
+        value: 'Folgers'
+    },
+    {
+        label: 'Illy',
+        value: 'Illy'
+    },
+    {
+        label: 'Jacobs',
+        value: 'Jacobs',
+    },
+    {
+        label: 'Kenco',
+        value: 'Kenco'
+    },
+    {
+        label: 'Lavazza',
+        value: 'Lavazza'
+    },
+    {
+        label: 'Lipton',
+        value: 'Lipton'
+    },
+    {
+        label: 'Maxwell House',
+        value: 'Maxwell House'
+    },
+    {
+        label: 'Moccona',
+        value: 'Moccona'
+    },
+    {
+        label: 'Mount Hagen',
+        value: 'Mount Hagen'
+    },
+    {
+        label: 'Nescafé',
+        value: 'Nescafé'
+    },
+    {
+        label: 'PG Tips',
+        value: 'PG Tips'
+    },
+    {
+        label: 'Starbucks',
+        value: 'Starbucks'
+    },
+    {
+        label: 'Tasters Choice',
+        value: 'Tasters Choice'
+    },
+    {
+        label: 'Typhoo',
+        value: 'Typhoo'
+    },
+    {
+        label: 'Twinings',
+        value: 'Twinings'
+    },
+]
+```
+
+Eg3
+
+```
+export const measureOptions: SelectOption<MeasureValue>[] = [
+    {
+        label: 'Sales value',
+        value: 'Sales value',
+    },
+    {
+        label: 'Sales units',
+        value: 'Sales units',
+    },
+    {
+        label: 'Share of category',
+        value: 'Share of category',
+    },
+    {
+        label: 'Av. price per unit',
+        value: 'Av. price per unit',
+    },
+    {
+        label: '% sold on promotion',
+        value: '% sold on promotion',
+    },
+    {
+        label: 'Rate of sale',
+        value: 'Rate of sale',
+    },
+    {
+        label: 'Stores selling',
+        value: 'Stores selling',
+    },
+]
+```
+
+eg4, 5, 6:
+
+```
+export const histogramFor = (
+    selectedBrand: SelectOption<'Jacobs' | 'Nescafé' | 'Lipton'>,
+    selectedCategory: CategoryOption<'Coffee' | 'Instant coffee'>,
+    selectedCompetitor: SelectOption<'Lavazza' | 'Maxwell House'>
+): string => {
+
+    switch (selectedBrand.value) {
+        case 'Jacobs':
+        case 'Lipton':
+            return svgs.stateDependent.histogram[selectedBrand.value].generic
+
+        case 'Nescafé':
+            return svgs.stateDependent.histogram[selectedBrand.value][selectedCategory.id][selectedCompetitor.value]
+
+        default: return assertNever(selectedBrand.value)
     }
 }
-var person = { name: 'matt', job: 'being awesome' };
-var animal = { name: 'cow', diet: 'vegan, but has milk of own species' };
-
-logIfHasName(person); // okay
-logIfHasName(animal); // okay
-logIfHasName({neme: 'I just misspelled name to neme'}); // Error: object literals must only specify known properties. `neme` is excessive here.
 ```
 
-### Why is this Freshness rule only in effect for object litterals?
 
-__The reason why only object literals are type checked this way is because in this case additional properties that aren't actually used is almost always a typo or a misunderstanding of the API.__
+# Advice: 
 
-### What do I need to do if I want more flexibility?
+### Definitely stay with `stictNullChecks` and `noImplicitAny`, even if I need to add types (and type checks) to a 3rd party component from my team
 
-__A type can include _an index signature_ to explicitely indicate that excess properties are permittted.__
+It was a nightmare to not have these scrit parameters when I used the subcategory selector internals from dunnhumby.
 
-```
-var x: { foo: number, [key: string]: any };
-x = { foo: 1, baz: 2 };  // Ok, `baz` matched by index signature
-```
+In the end, I added whatever coded I needed to my copy of the dh files to be able to turn on the strict compiler features, and it worked.
 
-(Note: instead of `key`, I can use whatever I want). (And obviously specify a stricter type than any).
+I think that I would have been better off creating my own components from scratch.
 
+### If I use data a JSON or JS/TS data object, it's important that I model the types! Otherwise TS will throw me weird errors
 
-
-## Specifying index signatures for objects
-
-Eg
+eg I used this to model the types I got from Tesco's categories and rpoduct lists
 
 ```
-var x: { foo: number, [key: string]: any };
-x = { foo: 1, baz: 2 };  // Ok, `baz` matched by index signature
+export interface CategoryWithoutChildren {
+    name: string
+    children: []
+    [k: string]: any
+}
+
+export type SubCategory = {
+    id: string
+    name: string
+}
+
+export interface HighLevelProductInfo {
+    id: string
+    title: string
+    price: {
+        actual: number
+        unitPrice: number
+        unitOfMeasure: string
+    }
+    defaultImageUrl: string
+}
 ```
-
-(Note: instead of `key`, I can use whatever I want). (And obviously specify a stricter type than any).
-
-
-
-
